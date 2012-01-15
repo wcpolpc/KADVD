@@ -1,0 +1,19 @@
+<subpictures>
+	<stream>
+<pgc>
+<tex:prepage>
+\thispagebgimage{}{pal_bg_light}
+\thispagetemplate{palthumbsix}
+\menucaption{Fazekas szalagavató 1998.\ december}
+</tex:prepage>
+<vob tex:file="" pause="inf" />
+<button name="e1" tex:image="1.png" tex:caption="a szalagtűzés \emph{előtt}"> g5=6; </button>
+<button name="e2" tex:image="2.png" tex:caption="szalagtűzés"> jump menu 2; </button>
+<button name="e3" tex:image="3.png" tex:caption="osztálytáncok"> jump menu 3; </button>
+<button name="e4" tex:image="4.png" tex:caption="egyéb táncok"> jump menu 4; </button>
+<button name="e5" tex:image="5.png" tex:caption="videófelvételek"> jump menu 5; </button>
+<button name="prev" tex:dummy=""> jump vmgm menu 1; </button>
+<button name="back" tex:dummy=""> jump vmgm menu 1; </button>
+<button name="next" tex:dummy=""> jump vmgm menu 1; </button>
+<post> jump vmgm menu 1; </post>
+</pgc></stream></subpictures>

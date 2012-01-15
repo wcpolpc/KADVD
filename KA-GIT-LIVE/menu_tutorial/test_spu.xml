@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<subpictures>
+	<stream>
+		<spu force="yes" highlight="test_highlight_bl.png" image="test_image_bl.png"
+			select="test_select_bl.png" start="00:00:00.00">
+			<button down="run" left="run" name="run" right="run" up="run"
+				x0="10" x1="30" y0="10" y1="10" />
+		</spu>
+	</stream>
+</subpictures>
+
+<!-- <?xml version="1.0" ?>
+<subpictures>
+	<stream>
+		<spu force="yes" highlight="test_highlight_bl.png" image="test_image_bl.png"
+			select="test_select_bl.png" start="00:00:00.00">
+			<button down="run" left="run" name="run" right="run" up="run"
+				x0="159" x1="302" y0="106" y1="185" />
+		</spu>
+	</stream>
+</subpictures> -->

@@ -1,0 +1,96 @@
+application: khanexercises
+version: 764
+runtime: python
+api_version: 1
+default_expiration: "31d"
+
+skip_files:
+- ^(.*/)?app\.yaml
+- ^(.*/)?app\.yml
+- ^(.*/)?index\.yaml
+- ^(.*/)?index\.yml
+- ^(.*/)?#.*#
+- ^(.*/)?.*~
+- ^(.*/)?.*\.py[co]
+- ^(.*/)?.*/RCS/.*
+- ^(.*/)?\..*
+- ^(.*/)?sample_data/.*
+
+handlers:
+- url: /videos
+  static_dir: ../../videos
+  
+- url: /flvplayer
+  static_dir: flvplayer
+
+- url: /stylesheets
+  static_dir: stylesheets
+  
+- url: /favicon.ico
+  static_files: images/favicon.ico
+  mime_type: image/x-icon
+  upload: images/favicon.ico
+
+- url: /robots.txt
+  static_files: robots.txt
+  upload: robots.txt
+
+- url: /images/favicon.ico
+  static_files: images/favicon.ico
+  mime_type: image/x-icon
+  upload: images/favicon.ico
+
+- url: /images
+  static_dir: images
+
+- url: /javascript
+  static_dir: javascript
+
+- url: /helperpages/d\.svg
+  static_files: helperpages/d.svg
+  upload: helperpages/d\.svg
+  mime_type: image/svg+xml
+
+- url: /helperpages
+  static_dir: helperpages
+  
+- url: /downloads/(.*)
+  static_files: downloads/\1
+  upload: downloads/(.*)
+  
+  # The url below needs to be updated whenever we change/upgrade MathJax.
+  # Unfortunately, we can't use a regex due to a GAE bug:
+  # http://code.google.com/p/googleappengine/issues/detail?id=3380
+- url: /MathJax-1.1
+  static_dir: MathJax
+
+  # The url below needs to be updated whenever we change/upgrade scratchpad.
+  # Unfortunately, we can't use a regex due to a GAE bug:
+  # http://code.google.com/p/googleappengine/issues/detail?id=3380
+- url: /scratchpad-2011-03-28
+  static_dir: scratchpad
+
+  # The url below needs to be updated whenever we change/upgrade Jit.
+  # Unfortunately, we can't use a regex due to a GAE bug:
+  # http://code.google.com/p/googleappengine/issues/detail?id=3380
+- url: /Jit-2.0.0a
+  static_dir: Jit
+
+- url: /remote_api
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin  
+
+- url: /admin/.*
+  script: main.py
+  login: admin
+
+- url: /mapreduce(/.*)?
+  script: mapreduce/main.py
+  login: admin
+
+- url: .*
+  script: main.py
+  
+builtins:
+- appstats: on
+

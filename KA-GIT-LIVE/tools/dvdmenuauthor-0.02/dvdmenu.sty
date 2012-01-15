@@ -1,0 +1,891 @@
+%
+% dvdmenu.sty -- LaTeX style for the LaTeX menu backend of dvdmenuauthor
+% by pts@fazekas.hu at Mon Feb  5 19:39:47 CET 2007
+%
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{dvdmenu}[2007/02/05 dvdmenu.sty by pts@fazekas.hu]
+
+\RequirePackage{color}
+
+% --- Ensure PDF output with pdfTeX
+
+\@ifundefined{pdfoutput}{
+  \PackageError{dvdmenu}{Process this document with pdflatex}\@ehc
+  \@@end
+}{}
+
+\ifnum\pdftexversion<110
+  % Imp: test with older versions
+  % Dat: 1.10 is in Debian Sarge and Gentoo in 2006
+  \PackageError{dvdmenu}{pdfTeX version 1.10 or newer expected}\@ehc
+  \expandafter\@@end
+\fi
+
+%\showthe\pdftexversion
+%\typeout{PPP\pdftexrevision}
+
+
+\pdfoutput1
+\pdfcompresslevel9
+
+% --- Utitilies
+
+\def\DVD@swaptwo#1#2{#2#1}%
+
+%** Appends the token list #2 to the parameterless macro #1.
+%** Used to be based on \addto in babel.def -- but its effect isn't global,
+%** and it quotes `#'s properly even if the original macro body was empty.
+\long\def\DVD@addto#1{%
+  \ifx\@undefined#1\let#1\@empty
+  \else\ifx\relax#1\let#1\@empty
+  \fi\fi
+  \DVD@addto@low#1%
+}
+
+%** Appends the token list #2 to the parameterless macro #1.
+%** @param #1 \cs, mustn't be \@undefined or \relax
+\long\def\DVD@addto@low#1#2{%
+  \begingroup\toks@\expandafter{#1#2}%
+  % Dat: it is wrong to put \the\toks@ after \expandafter or inside \def --
+  %      the `#'s will not be doubled properly. Only \edef...{\the\toks@}
+  %      works.
+  \xdef\DVD@addto@@tmp{\the\toks@}%
+  \endgroup \let#1\DVD@addto@@tmp  \let\DVD@addto@@tmp\@undefined
+}
+
+% vvv Dat: test case (unit test)
+\begingroup
+  \let\foo\relax
+  \DVD@addto\foo{\def\bar#1{#1#1}}
+  \DVD@addto\foo{\def\bar#1#2{#2#1}}
+  \def\bar{\def\bar##1{##1##1}\def\bar##1##2{##2##1}}%
+  \ifx\foo\bar\else\errmessage{Test 5 failed}\fi
+\endgroup
+
+%** @param #1 \cs
+%** @param #2 tokens to add to the list (in \@for format: {item1},{item2},...,{itemn}) in \cs
+\def\DVD@addtolist#1#2{%
+  \ifnum1=\ifx#1\@undefined1\else\ifx#1\relax1\else\ifx#1\@empty1\else0\fi\fi\fi\space
+    \let#1\@empty
+    \expandafter\DVD@addto@low\expandafter#1\expandafter{%
+  \else
+    \expandafter\DVD@addto@low\expandafter#1\expandafter{\expandafter,%
+  \fi
+  {#2}}%
+  \iffalse}\fi% % Dat: balance braces
+}
+
+% vvv Dat: test case (unit test)
+\begingroup
+  \let\foo\relax
+  \DVD@addtolist\foo{\def\bar#1{#1#1}}
+  \DVD@addtolist\foo{\def\bar#1#2{#2#1}}
+  \def\bar{{\def\bar##1{##1##1}},{\def\bar##1##2{##2##1}}}%
+  \ifx\foo\bar\else\errmessage{Test 6 failed}\fi
+\endgroup
+
+%** Removes the very first space (charcode 32) token from the macro body
+%** (if any).
+%** @param #1 a \cs of a no-arg macro
+\def\DVD@killonespace#1{%
+  \begingroup
+    \edef\reserved@a{\expandafter\strip@prefix\meaning#1}%
+    \edef\reserved@b{\noexpand\DVD@killonespace@low \if\space\reserved@a\hfuzz1\fi\hfuzz0\vfuzz}%
+  \expandafter\endgroup\reserved@b#1%
+}
+\def\DVD@killonespace@low#1\hfuzz#2#3\vfuzz#4{%
+  \ifx#21%
+    \expandafter\expandafter\expandafter\def\expandafter\expandafter\expandafter
+      #4\expandafter\expandafter\expandafter{% Dat: remove 1st space
+      \expandafter\romannumeral\expandafter0#4}%
+  \fi
+}
+% vvv Dat: test case (unit test)
+\begingroup
+  \def\foo{ \else\bar}
+  \def\bar{\else\bar}
+  \DVD@killonespace\foo
+  \ifx\foo\bar\else\errmessage{Test 9 failed}\fi
+  \DVD@killonespace\foo
+  \ifx\foo\bar\else\errmessage{Test 10 failed}\fi
+\endgroup
+
+% --- Environment body grabbing framework (from DVD)
+%
+% Use:
+%
+%   \newenvironment{grab}{\DVD@grabenvstart}{\show\DVD@@grabdata}%
+%
+%   \begin{grab}grabbed tokens\end{grab}
+%
+% Please note that the catcodes are fixed at grabbing time.
+%
+% Dat: not nestable
+%
+
+\long\def\DVD@grab@lowa#1\end{%
+  \DVD@addto\DVD@@grabdata{#1}%
+  \@ifnextchar\bgroup\DVD@grab@lowb
+    {\DVD@addto\DVD@@grabdata\end \DVD@grab@lowa}
+}
+
+%** @param #1 environment name (was delimited by braces)
+\def\DVD@grab@lowb#1{%
+  \toks@{#1}\edef\reserved@a{\the\toks@}% Dat: allow # in env name
+  \ifx\reserved@a\@currenvir
+    \expandafter\end\expandafter{\@currenvir}%
+  \else
+    \DVD@swaptwo{\DVD@addto\DVD@@grabdata{\end{#1}}\DVD@grab@lowa}%
+  \fi
+}
+
+\def\DVD@grabenvstart{%
+  \def\DVD@@grabdata{}% Dat: collects grabbed args
+  \DVD@grab@lowa
+}%
+
+% vvv Dat: test case
+\begingroup
+  \let\test\DVD@grabenvstart
+  \def\endtest{%
+    \def\bar{ \def \foo ####1####2{bar(####1)} \par \begin {textit}italics\end {textit} \foo {42}{\end {grab}} \iffalse \end <\end \end {bar####}\fi bye }%
+    % \show\DVD@@grabdata \show\bar
+    \ifx\DVD@@grabdata\bar\else \errmessage{Test 7 failed}\fi
+  }
+  \begin{test}
+    \def\foo#1#2{bar(#1)}
+
+    \begin{textit}italics\end{textit}
+  \foo{42}{\end{grab}}
+  \iffalse\end<\end\end{bar#}\fi
+  bye
+  \end{test}%
+\endgroup
+
+
+
+% -- Page setup
+
+\paperwidth720bp \paperheight576bp % Dat: PAL
+% \paperwidth720bp \paperheight576bp % Dat: NTSC
+
+\pdfpagewidth\paperwidth \pdfpageheight\paperheight
+
+\parindent0bp
+
+% Imp: other dimension
+\fboxsep3bp
+\fboxrule1bp
+\unitlength1bp
+
+%** Dat: overrides size10.clo
+\renewcommand\normalsize{%
+   \@setfontsize\normalsize{32bp}{48.4bp}% !! etc.
+   \abovedisplayskip 10\p@ \@plus2\p@ \@minus5\p@
+   \abovedisplayshortskip \z@ \@plus3\p@
+   \belowdisplayshortskip 6\p@ \@plus3\p@ \@minus3\p@
+   \belowdisplayskip \abovedisplayskip
+   \let\@listi\@listI}
+% vvv Dat: \AtBeginDocument needed so dvdmenu.sty can be loaded before lmodern.sty etc.
+\AtBeginDocument{\normalfont\normalsize}
+
+% ---
+
+%** Includes external image without scaling. (Only pdflatex guarantees
+%** no scaling, normal latex with EPS inclusion doesn't.)
+%** @param #1 external image name, without extension (.eps or .pdf)
+% Imp: fake this, too for buttons
+%\def\includegraphicsNoscale#1{%
+%  \ifnum\pdfoutput>0
+%    % vvv Dat: according to pdftex-t.pdf, the \hbox with the image below
+%    %     will get an appropriate width and depth.
+%    \hbox{\pdfximage{#1.pdf}\pdfrefximage\pdflastximage}%
+%  \else
+%    \includegraphics{#1}% Dat: scales the image a little bit :-( (but not in our PDF, good)
+%  \fi
+%}
+
+% ---
+
+%** 0: normal
+%** 1: highlighted
+%** 2: selected
+\newcount\DVD@pagemode
+
+% --- \thispagecolor 
+
+%** Similar to \pagecolor in color.sty, but has effect on the current page
+%** only. Works with pdftex.def only (uses \GPTorg@shipout etc.). See also
+%** implementation of \begin{dvdmenupage}
+\def\thispagecolor#1{%
+  \ifnum\DVD@pagemode=0  \DVD@thispagecolor{#1}\fi
+}
+
+\def\DVD@thispagecolor#1{%
+  %\typeout{pagemode=\the\DVD@pagemode; color=#1}%
+  \@ifundefined{DVD@save@pagecolor}{%
+    \global\let\DVD@save@pagecolor\current@page@color}{}%
+  \pagecolor{#1}% Dat: this defines \GPTorg@shipout 1st
+  \@ifundefined{GPTorg@shipout}{\PackageError{dvdmenu}{pdftex.def expected}\@ehc}{}%
+}
+
+% --- \thispagebgimage
+
+\let\DVD@@bgimg@opts\@empty
+\let\DVD@@bgimg@file\@empty
+
+%** Overrides \thispagecolor.
+%** @param #1 [options] to \includegraphcs
+%** @param #2 image file name (should be .pdf; ext auto-appended)
+\def\thispagebgimage#1#2{%
+  \ifnum\DVD@pagemode=0
+    \global\def\DVD@@bgimg@opts{#1}%
+    \global\def\DVD@@bgimg@file{#2}%
+    \ifx\DVD@@bgimg@file\@empty\PackageError{dvdmenu}{Image background must not be empty}\@ehc\fi
+  \fi
+}
+
+% --- Absolute positioning
+
+%** Emits #B with relatively positioning its reference point
+%** to (#X,#Y) in a \vbox whose dimensions are 0
+%** @usage \putat{#X}{#Y}#B
+%** @param #X relative right position (\dimen)
+%** @param #Y relative down position (\dimen)
+%** @param #B box spec
+\def\putat#1#2{%
+  \begingroup
+  \def\DVD@@putat@right{#1}%
+  \def\DVD@@putat@down{#2}%
+  \afterassignment\DVD@putat@lowb
+  \setbox\@tempboxa
+}
+
+\def\DVD@putat@lowb{\aftergroup\DVD@putat@lowa}
+
+%** @in \@tempboxa, \DVD@@putat@right, \DVD@@putat@down
+\def\DVD@putat@lowa{%
+  \ifvmode\nointerlineskip\fi
+  \vbox to\z@{%
+    \wd\@tempboxa\z@
+    \kern\DVD@@putat@down\relax
+    \kern-\ht\@tempboxa
+    \moveright\DVD@@putat@right\box\@tempboxa
+    \vss
+  }%
+  \ifvmode\nointerlineskip\fi
+  \endgroup
+}
+
+% --- Place framed \hboxes, similar to \framebox, but autowidth
+
+%** Dat: uses \fboxrule as the width of the rule around the box
+%** @usage \framehbox#S{#C}
+%** @param #S separation dimen, such as \fboxsep
+%** @param #C \hbox contents. May cotain \catcode changes
+%** @example \framehbox{1pt}{foo}
+\def\framehbox#1{%
+  \begingroup
+  \fboxsep#1\relax
+  % vvv Dat: process \DVD@framehbox@lowb after `\hbox...{'
+  % vvv Dat: only the last \afterassignment has effect (no stacking)
+  \afterassignment\DVD@framehbox@lowb
+  \setbox\@tempboxa\hbox
+  %#2}% Dat: \afterassignment doesn't work
+  %\setbox\@tempboxa\hbox{\aftergroup\DVD@framehbox@lowa
+}
+\def\DVD@framehbox@lowb{%
+  % vvv Dat: in case somebody creates a \vbox
+  \advance\hsize-2\fboxrule                  
+  \advance\hsize-2\fboxsep
+  \linewidth\hsize % for \begin{itemize}
+  \columnwidth\hsize
+  % vvv add \DVD@framehbox@lowa after the `\hbox{...}'
+  \aftergroup\DVD@framehbox@lowa
+}%
+%** Box in \@tempboxa
+\def\DVD@framehbox@lowa{%
+  \@tempdima\dp\@tempboxa
+  \advance\@tempdima\fboxrule
+  \advance\@tempdima\fboxsep
+  % vvv Imp: warning: Overfull \hbox etc. (no warning now, not a par)
+  \ifvmode \hbox\bgroup \let\DVD@framebox@@egroup\egroup
+  \else\let\DVD@framebox@@egroup\relax\fi
+  \lower\@tempdima\hbox{%
+    \vrule width\fboxrule
+    \vbox{%
+      \hrule height\fboxrule
+      \kern\fboxsep
+      \hbox{\kern\fboxsep  \box\@tempboxa  \kern\fboxsep}%
+      \kern\fboxsep
+      \hrule height\fboxrule
+    }%
+    \vrule width\fboxrule
+  }%
+  \DVD@framebox@@egroup
+  \endgroup
+}
+
+% --- Fake \includegraphics
+
+%** Doesn't include the specified image, but skips its place
+%** @param #1 the optional parameter (opts)
+%** @param #2 the mandatory parameter (image file name)
+\newcommand\DVD@fake@includegraphics[2][]{%
+  \begingroup
+    \setbox0\hbox{\DVD@save@includegraphics[#1]{#2}}%
+    \setbox1\hbox{}%
+    \wd1=\wd0 \ht1=\ht0 \dp1=\dp0
+    \box1
+  \endgroup
+}
+
+% --- \begin{dvdmenupage}
+
+%\pagecolor{yellow}
+
+\def\DVD@menupage@setup{%
+  \DVD@menupage@setup@page
+  \DVD@menupage@setup@fontsize
+  \DVD@menupage@setup@color
+  \DVD@menupage@setup@moveaway
+  \DVD@menupage@setup@write
+}
+\def\DVD@menupage@setup@page{%
+  \hsize\paperwidth
+  \textwidth\hsize \linewidth\hsize \columnwidth\hsize
+}
+\def\DVD@menupage@setup@fontsize{%
+  \normalfont\normalsize
+  \parindent0bp
+  \parskip20bp % Dat: also added below \hrule :-(
+  \par
+}
+\def\DVD@menupage@setup@color{%
+  \normalcolor
+}
+\def\DVD@menupage@setup@moveaway{}%
+\def\DVD@menupage@moveback{}%
+\def\DVD@menupage@setup@write{%
+  \protected@write\@auxout{}{\expandafter\@gobble\string\% DVD starting menu \thepage;
+     r=\DVD@@fakepage@r; g=\DVD@@fakepage@g; b=\DVD@@fakepage@b}%
+}%
+
+\def\DVD@moveaway{%
+  \pdfliteral direct{1 0 0 1  10000  10000 cm}%
+}
+\def\DVD@moveback{%
+  \pdfliteral direct{1 0 0 1 -10000 -10000 cm}%
+}
+
+%** @param #1 a comma-separated list of button names of current menu
+%** @example \dvdmenupage{vertical material}
+%** !! don't use argument #2 right now (to allow \begin{verbatim} and other
+%**    \catcode-changing hacks)
+\newenvironment{dvdmenupage}[1]{%
+  \let\DVD@nodocument\@empty
+  \def\DVD@@buttonorder{#1}%
+  \let\thispagetemplate\DVD@thispagetemplate
+  \DVD@grabenvstart
+}{%
+  \let\DVD@@pagedata\DVD@@grabdata
+  \DVD@definebuttons
+  \begingroup
+    \DVD@pagemode=0 % normal
+    \DVD@processpage\DVD@@pagedata
+  \endgroup
+  \begingroup % highlighted
+    \DVD@setup@fakemode
+    \DVD@pagemode=1
+    \def\DVD@menupage@setup@color{\color{dvdhighlightedcolor}\DVD@disablecolors}%
+    \DVD@processpagebuttons
+  \endgroup
+  \begingroup % selected
+    \DVD@setup@fakemode
+    \DVD@pagemode=2
+    \def\DVD@menupage@setup@color{\color{dvdselectedcolor}\DVD@disablecolors}%
+    \DVD@processpagebuttons
+  \endgroup
+  %\show\DVD@save@pagecolor
+  \addtocounter{page}{1}% Dat: 1 per menu, buttons don't count
+}
+
+%** Defines \def\DVD@button@secondbutton{2} etc.
+\def\DVD@definebuttons{%
+  \@tempcnta\@ne
+  \expandafter\@for\expandafter\DVD@@curbutton\expandafter:%
+    \expandafter=\expandafter{\DVD@@buttonorder}\do{%
+    \DVD@killonespace\DVD@@curbutton
+    \expandafter\expandafter\expandafter\def\expandafter\expandafter
+      \csname DVD@@button@\DVD@@curbutton\endcsname
+      \expandafter{\the\@tempcnta}%
+    \advance\@tempcnta\@ne
+  }%
+  %\show\DVD@@button@bb
+}
+
+%** Defines \def\DVD@button@secondbutton{2} etc.
+\def\DVD@showmissingbuttons{%
+  \expandafter\@for\expandafter\DVD@@curbutton\expandafter:%
+    \expandafter=\expandafter{\DVD@@buttonorder}\do{%
+    \DVD@killonespace\DVD@@curbutton
+    \edef\reserved@a{\the\c@page}% Dat: compare to this, against \global
+    \expandafter\ifx\expandafter\reserved@a\csname DVD@@definedbutton@\DVD@@curbutton \endcsname\else
+      %\expandafter\let\expandafter\reserved@b\csname DVD@@definedbutton@\DVD@@curbutton \endcsname
+      %\show\reserved@b \show\reserved@a
+      \PackageWarningNoLine{dvdmenu}{Missing button in menu \thepage: \DVD@@curbutton}%
+      \protected@write\@auxout{}{\expandafter\@gobble\string\% DVD missing button in menu \thepage: \DVD@@curbutton}%
+    \fi
+  }%
+  %\show\DVD@@button@bb
+}
+
+\def\DVD@menupage@setup@writecurbutton{%
+  \protected@write\@auxout{}{\expandafter\@gobble\string\% DVD button in menu \thepage: \DVD@@curbutton}%
+}
+
+\def\DVD@processpagebuttons{%
+  \expandafter\@for\expandafter\DVD@@curbutton\expandafter:%
+    \expandafter=\expandafter{\DVD@@buttonorder}\do{%
+    \DVD@killonespace\DVD@@curbutton
+    %\def\DVD@@curbutton{ccc}%
+    \edef\DVD@@curbutton{\expandafter\strip@prefix\meaning\DVD@@curbutton}%
+    % ^^^ Dat: use \meaning so that we can compare with \ifx visually
+    \ifnum\DVD@pagemode=1
+      \let\DVD@menupage@setup@write\DVD@menupage@setup@writecurbutton
+    \else
+      \let\DVD@menupage@setup@write\@empty
+    \fi
+    \begingroup
+      \DVD@thispagecolor{dvdfakepage}% needs \DVD@pagemode=0 here
+      %\DVD@disablecolors % Dat: too early, runs before \DVD@menupage@setup@color
+      %\showthe\DVD@pagemode % 1, always OK
+      \DVD@processpage\DVD@@pagedata
+    \endgroup
+  }% end of \@for
+}%
+
+\def\DVD@setup@fakemode{%
+  \DVD@pagemode=1
+  \let\label\@gobble
+  \let\cite\@gobble% Imp: smarter
+  \let\DVD@save@includegraphics\includegraphics
+  \let\includegraphics\DVD@fake@includegraphics
+  % vvv move away (to infinity) all page objects by default.
+  %     Will move back only for a single button, which is being typeset.
+  \let\DVD@menupage@setup@moveaway\DVD@moveaway
+  \let\DVD@menupage@moveback\DVD@moveback
+  \let\DVD@menupage@setup@write\@empty
+  % Dat: \thispagecolor knows about \DVD@pagemode, no need to set up fake
+}
+
+\newbox\DVD@page
+
+%** Emits a page (with \shipout)
+%** Caller should provide \begingroup
+%** @param #1 page data (TeX source) to process
+\def\DVD@processpage#1{%
+  %\begingroup
+  %\topskip40pt % Dat: no effect
+  \setbox\DVD@page\vbox to\paperheight\bgroup
+    \DVD@menupage@setup
+    % Imp: ignorespaces etc.
+    %\bgroup
+    \ignorespaces
+    \DVD@@grabdata
+    \vfil
+    \DVD@menupage@moveback
+    % vvv Dat: do it here, so \shipout will \write
+    \ifnum\DVD@pagemode=0 \DVD@showmissingbuttons \fi
+  \egroup% end ov \vbox
+  %\setbox0\vbox{\kern-1in \hbox{\kern-1in \box0}}%
+
+  \ifx\DVD@@bgimg@file\@empty\else
+    \setbox\DVD@page\vbox{%
+      \vbox to0pt{%
+        \let\DVD@menupage@setup@write\@empty
+        \DVD@menupage@setup
+        \hbox{\expandafter\includegraphics\expandafter
+          [\DVD@@bgimg@opts]{\DVD@@bgimg@file}}%
+        \vss
+      }%
+      \nointerlineskip
+      \box\DVD@page
+    }%
+  \fi
+  \global\let\DVD@@bgimg@opts\@empty
+  \global\let\DVD@@bgimg@file\@empty
+  %
+  \hoffset-1in \voffset-1in
+  % ^^^ Dat: similar to  \setbox0\hbox{\kern-1in\box0}  \setbox0\vbox{\kern-1in\box0}%
+  \let \protect \noexpand % from \@outputpage, for emitting \write by \protected@write
+  \shipout\box\DVD@page
+  %
+  \@ifundefined{DVD@save@pagecolor}{}{%
+    \global\let\current@page@color\DVD@save@pagecolor
+  }%
+  \global\let\DVD@save@pagecolor\@undefined
+  %\endgroup
+}
+
+% --- colors
+
+\def\DVD@disablecolors{%
+  %\colors@false % Dat: no effect
+  \let\set@color\@empty \let\reset@color\@empty
+}
+
+%** @param #1 old
+%** @param #2 new
+\def\aliascolor#1#2{%
+  \@ifundefined{\string\color @#2}%
+    {\PackageError{dvdmenu}{Missing color #2}\@ehc}{}%
+  \expandafter\let\expandafter\reserved@a\csname\string\color @#2\endcsname
+  \@ifundefined{\string\color @#1}{}%
+    {\PackageInfo{color}{Redefining color #1}}%
+  \expandafter\let\csname\string\color @#1\endcsname\reserved@a
+}
+
+\aliascolor{dvddefaultpagecolor}{white}% {rgb}{1,1,1}
+%\definecolor{dvddefaultpagecolor}{named}{dvdfakepage}% rgb}{1,1,1}% white; Imp: alias
+\def\DVD@@fakepage@r{0}
+\def\DVD@@fakepage@g{0}
+\def\DVD@@fakepage@b{.996}
+% vvv Imp: allow it to be redefined in each menu (without warnings)
+\AtBeginDocument{%
+  \edef\reserved@a{\noexpand\definecolor{dvdfakepage}{rgb}{%
+    \DVD@@fakepage@r,\DVD@@fakepage@g,\DVD@@fakepage@b}} \reserved@a}% #fffffe
+\definecolor{dvdhighlightedcolor}{rgb}{.9803,.5882,.1961}% #fa9632
+\definecolor{dvdselectedcolor}{rgb}{1,.0784,.0784}% ff1414
+
+\AtBeginDocument{\pagecolor{dvddefaultpagecolor}}%
+
+% --- Drawing phantom frames
+
+\newif\if@phantomframetypesetcontents \@phantomframetypesetcontentstrue
+\newdimen\phantomframesep   \phantomframesep2bp
+\newdimen\phantomframewidth \phantomframewidth1bp
+%** Set colors etc.
+\def\phantomframesetup{%
+}
+
+%** \phantomframedhbox is like a \hbox, but also draws a rectangular frame
+%** around the box (above the box) of width \phantomframewidth,
+%** \phantomframesep apart.
+%** @example \phantomframedhbox to5pt{...}
+\def\phantomframedhbox{%
+  \begingroup
+  \afterassignment\DVD@phantomframedhbox@lowa
+  \setbox0\hbox
+}
+
+\def\DVD@phantomframedhbox@lowa{%
+  \aftergroup\DVD@phantomframedhbox@typeset
+}
+
+%** @in \box0 contains the box
+%** @in we need \endgroup
+%** Imp: cater for rounding errors in xdvi(1)
+\def\DVD@phantomframedhbox@typeset{%
+  %A\enspace
+  \setbox1\hbox{%
+    \if@phantomframetypesetcontents  \kern-\wd0 \fi
+    \lower\dp0\vbox{%
+      \phantomframesetup
+      \kern-\phantomframewidth
+      \kern-\phantomframesep
+      \hbox{%
+        \kern-\phantomframesep
+        \kern-\phantomframewidth
+        \vrule width\phantomframewidth
+        \vbox{%
+          \hrule height\phantomframewidth
+          \kern\phantomframesep
+          \hbox{%
+            \kern\phantomframesep
+            \vrule width0pt height\ht0 depth\dp0
+            \kern\wd0
+            %\box0
+            \kern\phantomframesep
+          }%
+          \kern\phantomframesep
+          \hrule height\phantomframewidth
+        }%
+        \vrule width\phantomframewidth
+        \kern-\phantomframewidth
+        \kern-\phantomframesep
+      }%
+      \kern-\phantomframesep
+      \kern-\phantomframewidth
+    }%
+  }%
+  \if@phantomframetypesetcontents
+    \hbox{%
+      \box0 % Dat: draw original material first (below)
+      \box1
+    }%
+  \else
+    \box1
+  \fi
+  %\enspace B%
+  \endgroup
+}
+
+% --- DVD buttons
+
+\AtEndDocument{%
+  \cleardoublepage
+  \@tempcnta\c@page  \advance\@tempcnta\m@ne
+  \immediate\write\@auxout{\expandafter\@gobble\string\% DVD number of menus: \the\@tempcnta}%
+}
+
+%** Typesets a button. Its highligthed version will be of dvdhighlightcolor,
+%** and its selected version will be of dvdselectcolor.
+%** It is not recommended that the button contains raster images (because
+%** color of raster images cannot be changed).
+%** @param #1 button name (usually just 1, 2, ...)
+%** @param #2 button text
+\def\dvdtextbutton#1#2{%
+  \ifnum\DVD@pagemode=0
+    \DVD@ondefinebutton{#1}%
+    \DVD@typesetbutton@low{#2}%
+  \else
+    \def\reserved@a{#1}%
+    \edef\reserved@a{\expandafter\strip@prefix\meaning\reserved@a}%
+    \ifx\reserved@a\DVD@@curbutton
+      \DVD@moveback
+      \DVD@typesetbutton@low{#2}%
+      \DVD@moveaway
+    \else
+      \DVD@typesetbutton@low{#2}%
+    \fi
+  \fi
+}
+
+%** @param #1 button name
+\def\DVD@ondefinebutton#1{%
+  \@ifundefined{DVD@@button@#1}{%
+    \protected@write\@auxout{}{\expandafter\@gobble\string\% DVD undeclared button in menu \thepage: #1}%
+    \PackageWarningNoLine{dvdmenu}{Undeclared button in menu \thepage: #1}%
+  }{}%
+  \edef\reserved@a{\the\c@page}% Dat: compare to this, against \global
+  \expandafter\ifx\expandafter\reserved@a\csname DVD@@definedbutton@#1\endcsname
+    % Dat: it is not an error to have multiple button declarations under the
+    %      same name in a menu
+  \else %\@ifundefined{DVD@@definedbutton@#1}{%
+    % vvv Dat: we need \global here so that buttons can be defined in a group
+    %          and a \hbox or \vbox
+    % vvv Dat: we need \the\c@page here to distinguish between buttons defined
+    %          on different pages
+    \expandafter\global\expandafter\edef
+      \csname DVD@@definedbutton@#1\endcsname{\the\c@page}%
+  \fi
+}
+
+\def\DVD@typesetbutton@low#1{%
+  \begingroup#1\endgroup
+}
+
+%** User-customizable.
+\newdimen\dvdbuttonframesep   \dvdbuttonframesep0bp
+%** User-customizable.
+\newdimen\dvdbuttonframewidth \dvdbuttonframewidth4bp
+%** User-customizable.
+\def\dvdbuttonframesetup{%
+}
+\def\DVD@fullbuttonframesetup{%
+  % Dat: no need to change color, already changed
+  \phantomframesep  \dvdbuttonframesep
+  \phantomframewidth\dvdbuttonframewidth
+  \dvdbuttonframesetup
+}
+
+%** Typesets a button. Its highligthed version will be of dvdhighlightcolor,
+%** and its selected version will be of dvdselectcolor. Both highlighted and
+%** selected versions will be rectangular frames (visible but of no dimen
+%** size) of width \dvdbuttonframewidth, \dvdbuttonframesep away from the main
+%** material. Uses \dvdbuttonframesetup.
+%**   The button might contain raster images.
+%** @param #1 button name (usually just 1, 2, ...)
+%** @param #2 button text
+\def\dvdframebutton#1#2{%
+  \ifnum\DVD@pagemode=0
+    \DVD@ondefinebutton{#1}%
+    \hbox{\DVD@typesetbutton@low{#2}}%
+  \else
+    \def\reserved@a{#1}%
+    \edef\reserved@a{\expandafter\strip@prefix\meaning\reserved@a}%
+    \let\DVD@@now@moveaway\@empty
+    \ifx\reserved@a\DVD@@curbutton
+      \DVD@moveback
+      \def\DVD@@now@moveaway{\DVD@moveaway}%
+    \fi
+    \begingroup
+      \def\phantomframesetup{\DVD@fullbuttonframesetup}%
+      \phantomframedhbox{\DVD@typesetbutton@low{#2}}%
+    \endgroup
+    \DVD@@now@moveaway
+  \fi
+}
+
+% --- \begin{narrowcentering}
+
+%** \begin{narrowcentering} is like \begin{centering}, but affacted by
+%** original \leftskip and \rightskip
+\def\narrowcentering{%
+  \@tempdima\leftskip  % Dat: ignore plus and minus
+  \@tempdimb\rightskip % Dat: ignore plus and minus
+  \leftskip\z@skip  \rightskip\z@skip
+  \centering
+  \advance\leftskip \@tempdima
+  \advance\rightskip\@tempdimb
+}
+\def\endnarrowcentering{\csname endcentering\endcsname}
+
+% --- Disable text outside \begin{dvdmenupage}
+
+\gdef\DVD@nodocument{%
+  \PackageError{dvdmenu}{Missing \protect\begin{dvdmenupage}}\@ehc}
+
+%** Disallow any text outside dvdmenupage
+\AtBeginDocument{\everypar{\DVD@nodocument}}
+
+% --- Page template helpers
+
+%** @param #1 template name, e.g. `palthumbsix'
+\def\DVD@thispagetemplate#1{%
+  \def\reserved@b{#1}%
+  \edef\reserved@b{\expandafter\strip@prefix\meaning\reserved@b}%
+  \expandafter\let\expandafter\reserved@a\csname
+    DVD@template@\reserved@b\endcsname
+  \ifx\reserved@a\relax
+    \PackageError{dvdmenu}{Unknown DVD template: \reserved@b}\@ehc
+  \else
+    \let\DVD@@curtemplate\reserved@b
+  \expandafter\reserved@a\fi
+}
+
+% --- Page template: palthumbsix (maximum six thumbnail buttons for PAL)
+
+\def\DVD@template@palthumbsix{%
+  \def\menucaption{\DVD@template@palthumbsix@menucaption}%
+  \def\dvdprocessbutton{\DVD@template@palthumbsix@dvdprocessbutton}%
+}
+%** Typesets menu caption text in #1
+\def\DVD@template@palthumbsix@menucaption#1{%
+  \putat{0bp}{62bp}\vbox{% Dat: \vbox aligns last line, \vtop aligns first line
+    \leftskip54bp \rightskip54bp % Dat: \begin{centering} doesn't care
+    \par\begin{narrowcentering}
+      %\par\vrule width 1bp hello \hfill\vrule width 1bp\par
+      \fontfamily{verdana}\fontsize{32pt}{38.4bp}\selectfont\sloppy
+      \begingroup#1\endgroup
+      %\\ second line
+      % ^^^ Dat: not centered completely properly :-(
+      % ^^^ Dat: xpdf looks uglier tuan QDvdAuthor (e.g. in QDvdAuthor,
+      %     the `a' in the Verdana font seems to be narrower -- aspect ratio??
+    \par\end{narrowcentering}
+  }%
+}
+%** \dvdprocessbutton is emitted by gendap.pl for <button tex:...=
+%** @in \def\dvdbuttonattrXkey{value}...
+\def\DVD@template@palthumbsix@dvdprocessbutton{%
+  \expandafter\let\expandafter\reserved@a\csname
+    DVD@template@\DVD@@curtemplate @button@\dvdbuttonattrXname\endcsname
+  \ifx\reserved@a\relax
+    \PackageError{dvdmenu}{Button not defined in template: \dvdbuttonattrXname}\@ehc
+  \else
+  \expandafter\reserved@a\fi
+}
+
+\@namedef{DVD@template@palthumbsix@button@e1}{%
+  % vvv Dat: \putat uses the lower left corner
+  \putat {54bp}{234bp}\hbox{\dvdframebutton{e1}{\includegraphics[width=.25\paperwidth,height=.25\paperheight]{\dvdbuttonattrXimage}}}
+  \@ifundefined{dvdbuttonattrXcaption}{}{%
+    \putat {54bp}{258bp}\vtop{\hsize180bp
+      \par\begin{centering}
+        %\par\vrule width 1bp hello \hfill\vrule width 1bp\par
+        \fontfamily{verdana}\fontsize{20pt}{24bp}\selectfont\sloppy
+        % vvv Imp: let the text be wider a little
+        \begingroup \dvdbuttonattrXcaption \endgroup
+      \par\end{centering}
+    }
+  }
+}
+
+\@namedef{DVD@template@palthumbsix@button@e2}{%
+  \putat{270bp}{234bp}\hbox{\dvdframebutton{e2}{\includegraphics[width=.25\paperwidth,height=.25\paperheight]{\dvdbuttonattrXimage}}}
+  \@ifundefined{dvdbuttonattrXcaption}{}{%
+    \putat{270bp}{258bp}\vtop{\hsize180bp
+      \par\begin{centering}
+        \fontfamily{verdana}\fontsize{20pt}{24bp}\selectfont\sloppy
+        \begingroup \dvdbuttonattrXcaption \endgroup
+      \par\end{centering}
+    }
+  }
+}
+
+\@namedef{DVD@template@palthumbsix@button@e3}{%
+  \putat{486bp}{234bp}\hbox{\dvdframebutton{e3}{\includegraphics[width=.25\paperwidth,height=.25\paperheight]{\dvdbuttonattrXimage}}}
+  \@ifundefined{dvdbuttonattrXcaption}{}{%
+    \putat{486bp}{258bp}\vtop{\hsize180bp
+      \par\begin{centering}
+        \fontfamily{verdana}\fontsize{20pt}{24bp}\selectfont\sloppy
+        \begingroup \dvdbuttonattrXcaption \endgroup
+      \par\end{centering}
+    }
+  }
+}
+
+\@namedef{DVD@template@palthumbsix@button@e4}{%
+  \putat {54bp}{444bp}\hbox{\dvdframebutton{e4}{\includegraphics[width=.25\paperwidth,height=.25\paperheight]{\dvdbuttonattrXimage}}}
+  \@ifundefined{dvdbuttonattrXcaption}{}{%
+    \putat {54bp}{468bp}\vtop{\hsize180bp
+      \par\begin{centering}
+        \fontfamily{verdana}\fontsize{20pt}{24bp}\selectfont\sloppy
+        \begingroup \dvdbuttonattrXcaption \endgroup
+      \par\end{centering}
+    }
+  }
+}
+
+\@namedef{DVD@template@palthumbsix@button@e5}{%
+  \putat{270bp}{444bp}\hbox{\dvdframebutton{e5}{\includegraphics[width=.25\paperwidth,height=.25\paperheight]{\dvdbuttonattrXimage}}}
+  \@ifundefined{dvdbuttonattrXcaption}{}{%
+    \putat{270bp}{468bp}\vtop{\hsize180bp
+      \par\begin{centering}
+        \fontfamily{verdana}\fontsize{20pt}{24bp}\selectfont\sloppy
+        \begingroup \dvdbuttonattrXcaption \endgroup
+      \par\end{centering}
+    }
+  }
+}
+
+\@namedef{DVD@template@palthumbsix@button@e6}{%
+  \putat{486bp}{444bp}\hbox{\dvdframebutton{e6}{\includegraphics[width=180bp,height=.25\paperheight]{\dvdbuttonattrXimage}}}
+  \@ifundefined{dvdbuttonattrXcaption}{}{%
+    \putat{486bp}{468bp}\vtop{\hsize180bp
+      \par\begin{centering}
+        \fontfamily{verdana}\fontsize{20pt}{24bp}\selectfont\sloppy
+        \begingroup \dvdbuttonattrXcaption \endgroup
+      \par\end{centering}
+    }
+  }
+}
+
+\def\DVD@template@palthumbsix@button@prev{%
+  % vvv Dat: pdfTeX 1.10b cannot embed PNG with alpha, so we embed it in PDF
+  \putat {68bp}{556bp}\hbox{\dvdframebutton{prev}{\includegraphics[]{design/transp_button_prev.pdf}}}
+}
+
+\def\DVD@template@palthumbsix@button@back{%
+  \putat{284bp}{556bp}\hbox{\dvdframebutton{back}{\includegraphics[]{design/transp_button_back.pdf}}}
+}
+
+\def\DVD@template@palthumbsix@button@next{%
+  \putat{500bp}{556bp}\hbox{\dvdframebutton{next}{\includegraphics[]{design/transp_button_next.pdf}}}
+}
+
+% --- End of LaTeX style file
+
+\endinput

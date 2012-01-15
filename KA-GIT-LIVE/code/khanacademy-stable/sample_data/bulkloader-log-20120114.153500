@@ -1,0 +1,169 @@
+[INFO     2012-01-14 15:35:00,139 bulkloader.py] Logging to bulkloader-log-20120114.153500
+[INFO     2012-01-14 15:35:00,139 bulkloader.py] Throttling transfers:
+[INFO     2012-01-14 15:35:00,139 bulkloader.py] Bandwidth: 250000 bytes/second
+[INFO     2012-01-14 15:35:00,139 bulkloader.py] HTTP connections: 8/second
+[INFO     2012-01-14 15:35:00,139 bulkloader.py] Entities inserted/fetched/modified: 20/second
+[INFO     2012-01-14 15:35:00,139 bulkloader.py] Batch Size: 10
+[INFO     2012-01-14 15:35:00,140 bulkloader.py] Opening database: bulkloader-progress-20120114.153500.sql3
+[DEBUG    2012-01-14 15:35:00,167 bulkloader.py] [Thread-1] RestoreThread: started
+[DEBUG    2012-01-14 15:35:00,985 bulkloader.py] [Thread-1] RestoreThread: exiting
+[DEBUG    2012-01-14 15:35:01,395 bulkloader.py] [Thread-2] RestoreThread: started
+[DEBUG    2012-01-14 15:35:01,398 adaptive_thread_pool.py] [WorkerThread-0] WorkerThread: started
+[DEBUG    2012-01-14 15:35:01,398 bulkloader.py] Configuring remote_api. url_path = /remote_api, servername = localhost:8080
+[DEBUG    2012-01-14 15:35:01,399 bulkloader.py] Bulkloader using app_id: dev~khanexercises
+[INFO     2012-01-14 15:35:01,399 bulkloader.py] Connecting to localhost:8080/remote_api
+[DEBUG    2012-01-14 15:35:01,434 bulkloader.py] [Thread-4] ProgressTrackerThread: started
+[DEBUG    2012-01-14 15:35:01,434 bulkloader.py] [Thread-5] DataSourceThread: started
+[INFO     2012-01-14 15:35:01,434 bulkloader.py] Starting import; maximum 10 entities per post
+[DEBUG    2012-01-14 15:35:01,462 adaptive_thread_pool.py] [WorkerThread-0] Got work item [1-10]
+[DEBUG    2012-01-14 15:35:02,080 bulkloader.py] [WorkerThread-0] [1-10] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:02,081 adaptive_thread_pool.py] [WorkerThread-0] Got work item [11-20]
+[DEBUG    2012-01-14 15:35:02,663 bulkloader.py] [WorkerThread-0] [11-20] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:02,664 adaptive_thread_pool.py] [WorkerThread-0] Got work item [21-30]
+[DEBUG    2012-01-14 15:35:03,223 bulkloader.py] [WorkerThread-0] [21-30] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:03,223 adaptive_thread_pool.py] [WorkerThread-0] Got work item [31-40]
+[DEBUG    2012-01-14 15:35:03,810 bulkloader.py] [WorkerThread-0] [31-40] Transferred 10 entities in 0.5 seconds
+[DEBUG    2012-01-14 15:35:03,810 adaptive_thread_pool.py] [WorkerThread-0] Got work item [41-50]
+[DEBUG    2012-01-14 15:35:04,382 bulkloader.py] [WorkerThread-0] [41-50] Transferred 10 entities in 0.5 seconds
+[DEBUG    2012-01-14 15:35:04,383 adaptive_thread_pool.py] [WorkerThread-0] Got work item [51-60]
+[DEBUG    2012-01-14 15:35:04,984 bulkloader.py] [WorkerThread-0] [51-60] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:04,984 adaptive_thread_pool.py] [WorkerThread-0] Got work item [61-70]
+[DEBUG    2012-01-14 15:35:05,576 bulkloader.py] [WorkerThread-0] [61-70] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:05,576 adaptive_thread_pool.py] [WorkerThread-0] Got work item [71-80]
+[DEBUG    2012-01-14 15:35:06,157 bulkloader.py] [WorkerThread-0] [71-80] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:06,157 adaptive_thread_pool.py] [WorkerThread-0] Got work item [81-90]
+[DEBUG    2012-01-14 15:35:06,752 bulkloader.py] [WorkerThread-0] [81-90] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:06,752 adaptive_thread_pool.py] [WorkerThread-0] Got work item [91-100]
+[DEBUG    2012-01-14 15:35:07,333 bulkloader.py] [WorkerThread-0] [91-100] Transferred 10 entities in 0.5 seconds
+[DEBUG    2012-01-14 15:35:07,333 adaptive_thread_pool.py] [WorkerThread-0] Got work item [101-110]
+[DEBUG    2012-01-14 15:35:07,922 bulkloader.py] [WorkerThread-0] [101-110] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:07,922 adaptive_thread_pool.py] [WorkerThread-0] Got work item [111-120]
+[DEBUG    2012-01-14 15:35:08,495 bulkloader.py] [WorkerThread-0] [111-120] Transferred 10 entities in 0.5 seconds
+[DEBUG    2012-01-14 15:35:08,495 adaptive_thread_pool.py] [WorkerThread-0] Got work item [121-130]
+[DEBUG    2012-01-14 15:35:09,087 bulkloader.py] [WorkerThread-0] [121-130] Transferred 10 entities in 0.5 seconds
+[DEBUG    2012-01-14 15:35:09,088 adaptive_thread_pool.py] [WorkerThread-0] Got work item [131-140]
+[DEBUG    2012-01-14 15:35:09,694 bulkloader.py] [WorkerThread-0] [131-140] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:09,694 adaptive_thread_pool.py] [WorkerThread-0] Got work item [141-150]
+[DEBUG    2012-01-14 15:35:10,268 bulkloader.py] [WorkerThread-0] [141-150] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:10,268 adaptive_thread_pool.py] [WorkerThread-0] Got work item [151-160]
+[DEBUG    2012-01-14 15:35:10,881 bulkloader.py] [WorkerThread-0] [151-160] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:10,881 adaptive_thread_pool.py] [WorkerThread-0] Got work item [161-170]
+[DEBUG    2012-01-14 15:35:11,540 bulkloader.py] [WorkerThread-0] [161-170] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:11,540 adaptive_thread_pool.py] [WorkerThread-0] Got work item [171-180]
+[DEBUG    2012-01-14 15:35:12,140 bulkloader.py] [WorkerThread-0] [171-180] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:12,140 adaptive_thread_pool.py] [WorkerThread-0] Got work item [181-190]
+[DEBUG    2012-01-14 15:35:12,745 bulkloader.py] [WorkerThread-0] [181-190] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:12,745 adaptive_thread_pool.py] [WorkerThread-0] Got work item [191-200]
+[DEBUG    2012-01-14 15:35:13,372 bulkloader.py] [WorkerThread-0] [191-200] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:13,372 adaptive_thread_pool.py] [WorkerThread-0] Got work item [201-210]
+[DEBUG    2012-01-14 15:35:13,991 bulkloader.py] [WorkerThread-0] [201-210] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:13,991 adaptive_thread_pool.py] [WorkerThread-0] Got work item [211-220]
+[DEBUG    2012-01-14 15:35:14,597 bulkloader.py] [WorkerThread-0] [211-220] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:14,597 adaptive_thread_pool.py] [WorkerThread-0] Got work item [221-230]
+[DEBUG    2012-01-14 15:35:15,205 bulkloader.py] [WorkerThread-0] [221-230] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:15,205 adaptive_thread_pool.py] [WorkerThread-0] Got work item [231-240]
+[DEBUG    2012-01-14 15:35:15,826 bulkloader.py] [WorkerThread-0] [231-240] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:15,826 adaptive_thread_pool.py] [WorkerThread-0] Got work item [241-250]
+[DEBUG    2012-01-14 15:35:16,416 bulkloader.py] [WorkerThread-0] [241-250] Transferred 10 entities in 0.6 seconds
+[DEBUG    2012-01-14 15:35:16,416 adaptive_thread_pool.py] [WorkerThread-0] Got work item [251-260]
+[ERROR    2012-01-14 15:35:16,656 adaptive_thread_pool.py] [WorkerThread-0] WorkerThread:
+Traceback (most recent call last):
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/adaptive_thread_pool.py", line 176, in WorkOnItems
+    status, instruction = item.PerformWork(self.__thread_pool)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/bulkloader.py", line 764, in PerformWork
+    transfer_time = self._TransferItem(thread_pool)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/bulkloader.py", line 935, in _TransferItem
+    self.request_manager.PostEntities(self.content)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/bulkloader.py", line 1420, in PostEntities
+    datastore.Put(entities)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/api/datastore.py", line 575, in Put
+    return PutAsync(entities, **kwargs).get_result()
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/datastore/datastore_rpc.py", line 777, in get_result
+    results = self.__rpcs[0].get_result()
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/api/apiproxy_stub_map.py", line 592, in get_result
+    return self.__get_result_hook(self)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/datastore/datastore_rpc.py", line 1547, in __put_hook
+    self.check_rpc_success(rpc)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/datastore/datastore_rpc.py", line 1182, in check_rpc_success
+    rpc.check_success()
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/api/apiproxy_stub_map.py", line 558, in check_success
+    self.__rpc.CheckSuccess()
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/api/apiproxy_rpc.py", line 156, in _WaitImpl
+    self.request, self.response)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/ext/remote_api/remote_api_stub.py", line 248, in MakeSyncCall
+    handler(request, response)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/ext/remote_api/remote_api_stub.py", line 391, in _Dynamic_Put
+    'datastore_v3', 'Put', put_request, put_response)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/ext/remote_api/remote_api_stub.py", line 177, in MakeSyncCall
+    self._MakeRealSyncCall(service, call, request, response)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/ext/remote_api/remote_api_stub.py", line 197, in _MakeRealSyncCall
+    raise pickle.loads(response_pb.exception())
+IOError: [Errno 28] No space left on device
+[DEBUG    2012-01-14 15:35:16,660 adaptive_thread_pool.py] [WorkerThread-0] WorkerThread: exiting
+[INFO     2012-01-14 15:35:16,703 bulkloader.py] Unexpected thread death: WorkerThread-0
+[INFO     2012-01-14 15:35:16,703 bulkloader.py] An error occurred. Shutting down...
+[DEBUG    2012-01-14 15:35:16,708 bulkloader.py] [Thread-5] DataSourceThread: exiting
+[DEBUG    2012-01-14 15:35:16,714 adaptive_thread_pool.py] Waiting for Anonymous_WorkerThread to exit
+[ERROR    2012-01-14 15:35:16,714 adaptive_thread_pool.py] Error in WorkerThread-0: [Errno 28] No space left on device
+[DEBUG    2012-01-14 15:35:16,714 adaptive_thread_pool.py] Traceback (most recent call last):
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/adaptive_thread_pool.py", line 176, in WorkOnItems
+    status, instruction = item.PerformWork(self.__thread_pool)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/bulkloader.py", line 764, in PerformWork
+    transfer_time = self._TransferItem(thread_pool)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/bulkloader.py", line 935, in _TransferItem
+    self.request_manager.PostEntities(self.content)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/bulkloader.py", line 1420, in PostEntities
+    datastore.Put(entities)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/api/datastore.py", line 575, in Put
+    return PutAsync(entities, **kwargs).get_result()
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/datastore/datastore_rpc.py", line 777, in get_result
+    results = self.__rpcs[0].get_result()
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/api/apiproxy_stub_map.py", line 592, in get_result
+    return self.__get_result_hook(self)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/datastore/datastore_rpc.py", line 1547, in __put_hook
+    self.check_rpc_success(rpc)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/datastore/datastore_rpc.py", line 1182, in check_rpc_success
+    rpc.check_success()
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/api/apiproxy_stub_map.py", line 558, in check_success
+    self.__rpc.CheckSuccess()
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/api/apiproxy_rpc.py", line 156, in _WaitImpl
+    self.request, self.response)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/ext/remote_api/remote_api_stub.py", line 248, in MakeSyncCall
+    handler(request, response)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/ext/remote_api/remote_api_stub.py", line 391, in _Dynamic_Put
+    'datastore_v3', 'Put', put_request, put_response)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/ext/remote_api/remote_api_stub.py", line 177, in MakeSyncCall
+    self._MakeRealSyncCall(service, call, request, response)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/ext/remote_api/remote_api_stub.py", line 197, in _MakeRealSyncCall
+    raise pickle.loads(response_pb.exception())
+IOError: [Errno 28] No space left on device
+
+[DEBUG    2012-01-14 15:35:16,715 bulkloader.py] Waiting for progress_thread to terminate...
+[ERROR    2012-01-14 15:35:16,722 bulkloader.py] [Thread-4] ProgressTrackerThread:
+Traceback (most recent call last):
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/bulkloader.py", line 1579, in run
+    self.PerformWork()
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/bulkloader.py", line 2424, in PerformWork
+    self.db.ThreadComplete()
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/bulkloader.py", line 1833, in ThreadComplete
+    self._MaybeCommit(force_commit=True)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/bulkloader.py", line 1849, in _MaybeCommit
+    self.secondary_conn.commit()
+OperationalError: disk I/O error
+[DEBUG    2012-01-14 15:35:16,723 bulkloader.py] [Thread-4] ProgressTrackerThread: exiting
+[DEBUG    2012-01-14 15:35:16,731 bulkloader.py] ... done.
+[ERROR    2012-01-14 15:35:16,731 bulkloader.py] Error in progress tracking thread: disk I/O error
+[DEBUG    2012-01-14 15:35:16,731 bulkloader.py] Traceback (most recent call last):
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/bulkloader.py", line 1579, in run
+    self.PerformWork()
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/bulkloader.py", line 2424, in PerformWork
+    self.db.ThreadComplete()
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/bulkloader.py", line 1833, in ThreadComplete
+    self._MaybeCommit(force_commit=True)
+  File "/home/dev/workspace-ka/KADVD/code/google_appengine/google/appengine/tools/bulkloader.py", line 1849, in _MaybeCommit
+    self.secondary_conn.commit()
+OperationalError: disk I/O error
+
+[INFO     2012-01-14 15:35:16,731 bulkloader.py] 1270 entities total, 0 previously transferred
+[INFO     2012-01-14 15:35:16,731 bulkloader.py] 250 entities (77877 bytes) transferred in 16.6 seconds
+[INFO     2012-01-14 15:35:16,731 bulkloader.py] Some entities not successfully transferred

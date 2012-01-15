@@ -1,0 +1,25 @@
+<dvdauthor>
+ <vmgm>
+<menus>
+<video format="pal"></video>
+<pgc entry="title">
+<vob file="menu.mpg" pause="inf"></vob>
+<button>jump titleset 1 menu;</button>
+</pgc>
+</menus>
+</vmgm>
+<titleset>
+<menus>
+<pgc entry="root">
+<vob file="menu.mpg" pause="inf"></vob>
+<button>jump title 1 chapter 1;</button>
+</pgc>
+</menus>
+<titles>
+<pgc>
+<vob file="ratio.mpg"  chapters="0,5:00,10:00,15:00,20:00,25:00,30:00,35:00" pause="3"/>
+<post> call menu; </post>
+</pgc>
+</titles>
+</titleset>
+</dvdauthor>

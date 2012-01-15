@@ -1,0 +1,66 @@
+{% extends "page_template.html" %}
+{% block pagescript %}
+<style>
+#coaches {
+    padding: 18px 23px;
+}
+#coaches p {
+    margin-top: 1.2em;
+    margin-bottom: 1.2em;
+}
+#coaches td {
+    padding: 9px;
+}
+#coaches tr.even_row td {
+    background-color:#FFFFFF;
+}
+#coaches tr.odd_row td {
+    background-color:#EFEFEF;
+}
+</style>
+{% endblock pagescript %}
+{% block pagetitle %}Coaches{% endblock pagetitle %}
+{% block pagecontent %}
+
+<article id="coaches">
+<h2>Add a coach</h2>
+<p>
+    Your coach will give you their coach id. Enter it here to give them access to your Khan Academy data.
+</p>
+
+<p>
+<form action="/registercoach" method="post">
+<input type="text" name="coach">
+<input type="submit" value="Add coach" class="simple-button action-gradient">
+</form>
+</p>
+
+{% if invalid_coach %}
+<p><span style="color:red;font-weight:bold;">We can't find this coach.</span></p>
+
+<p style="padding-left:18px;">
+        Make sure you're entering your full coach's full id, which looks like <strong>teacher@gmail.com</strong> or <strong>http://facebookid.khanacademy.org/1067499349</strong>.<br/>
+        If you're entering your coach id correctly and still having trouble, make sure your coach has logged in to the Khan Academy at least once.
+</p>
+{% endif %}
+
+{% if coaches %}
+
+    <h2>Your coaches</h2>
+
+    <table>
+    {% for coach in coaches %}
+            {% if forloop.counter|divisibleby:2 %}
+            <tr class="even_row">
+            {% else %}
+            <tr class="odd_row">
+            {% endif %}
+                <td>{{ coach|escape }}</td>
+                <td><a href="/unregistercoach?coach={{ coach|urlencode|escape }}" class="simple-button action-gradient">Remove coach</a></td>
+            </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+
+</article>
+{% endblock pagecontent %}

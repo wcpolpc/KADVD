@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<subpictures>
+	<stream>
+		<spu force="yes" highlight="kite_highlight_bl.png" image="kite_image_bl.png"
+			select="kite_select_bl.png" start="00:00:00.00">
+			<button down="Play" left="Bloopers" name="Bloopers" right="Bloopers"
+				up="Scenes" x0="304" x1="564" y0="340" y1="420" />
+			<button down="Bloopers" left="Scenes" name="Scenes" right="Scenes"
+				up="Play" x0="314" x1="514" y0="250" y1="314" />
+			<button down="Scenes" left="Play" name="Options" right="Play"
+				up="Bloopers" x0="490" x1="710" y0="140" y1="244" />
+			<button down="Scenes" left="Options" name="Play" right="Options"
+				up="Bloopers" x0="314" x1="462" y0="146" y1="234" />
+		</spu>
+	</stream>
+</subpictures>

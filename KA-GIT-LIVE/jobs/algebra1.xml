@@ -1,0 +1,41 @@
+<dvdauthor>
+	<vmgm>
+		<menus>
+			<video format="pal" />
+			<pgc entry="title">
+				<vob file="menu.mpg" pause="inf" />
+				<button>jump titleset 1 menu;</button>
+				<button>jump titleset 1 menu;</button>
+				<button>jump titleset 1 menu;</button>
+				<button>jump titleset 1 menu;</button>
+				<button>jump titleset 1 menu;</button>
+			</pgc>
+		</menus>
+	</vmgm>
+	<titleset>
+		<menus>
+			<pgc entry="root">
+				<vob file="menu.mpg" pause="inf" />
+				<button>jump title 1 chapter 1;</button>
+				<button>jump title 2 chapter 1;</button>
+				<button>jump title 3 chapter 1;</button>
+				<button>jump title 4 chapter 1;</button>
+				<button>jump title 1 chapter 1;</button>
+			</pgc>
+		</menus>
+		<titles>
+			<pgc>
+				<vob file="algebra--linear-equations-4.mpeg" chapters="0,1:00,2:00,3:00"
+					pause="3" />
+				<vob file="algebra--slope.mpeg" chapters="0,1:00,2:00,3:00"
+					pause="3" />
+				<vob file="algebra--slope-2.mpeg" chapters="0,1:00,2:00,3:00"
+					pause="3" />
+				<vob file="algebra--slope-3.mpeg" chapters="0,1:00,2:00,3:00"
+					pause="3" />
+
+				<post> call menu; </post>
+			</pgc>
+		</titles>
+	</titleset>
+</dvdauthor>

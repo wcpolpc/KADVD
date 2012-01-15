@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<subpictures>
+	<stream>
+		<spu force="yes" highlight="menu_highlight_bl.png" image="menu_image_bl.png"
+			select="menu_select_bl.png" start="00:00:00.00">
+			<button down="play" left="select" name="something" right="select"
+				up="something" x0="1" x1="30" y0="1" y1="22" />
+		</spu>
+	</stream>
+</subpictures>

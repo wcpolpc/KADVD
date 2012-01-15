@@ -1,0 +1,86 @@
+%
+% dvdmenu.tex (only for pdflatex)
+% by pts@fazekas.hu at Sat Feb  3 12:37:29 CET 2007
+%
+\documentclass{article}
+\usepackage{dvdmenu}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{t1enc}
+\usepackage{color}
+\usepackage[latin2]{inputenc}
+%\usepackage{anyfontsize}
+
+\makeatletter
+
+\begin{document}
+
+%Hello.\hrule bliha\hrule blihb\hrule
+%\clearpage
+
+\begin{dvdmenupage}{a,bb}% 1 vmgm
+  \label{MyMainMenu}
+  \thispagecolor{yellow}
+  \kern5ex
+  \leftskip3em \rightskip3em
+  \fontfamily{phv}\bfseries
+  vmgm main menu\par
+  \leavevmode\dvdframebutton{a}{Jûmp tö m\`enû 2}\par
+  \dvdtextbutton{bb}{Jûmp tö m\`enû 3 W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W}
+\end{dvdmenupage}
+
+%\pagecolor{white}
+%\shipout\vbox{}
+
+\begin{dvdmenupage}{a,bb,ccc}% 2 titleset 1 menu 2
+  \label{MenuTwo}
+  \thispagebgimage{}{pal_bg_light}
+  \vfil
+  \leftskip3em \rightskip3em
+  \hrule height0pt
+  \vskip-\parskip
+  \textbf{menu 2}\par
+  \dvdtextbutton{a}{Jûmp tö m\"a\i n m\`enû}\par
+  \dvdtextbutton{bb}{Jûmp tö m\`enû 2}\par
+  %\pdfliteral direct{1 0 0 1 -10000 -10000 cm}%
+  \dvdtextbutton{ccc}{Jûmp tö m\`enû 3}
+  \hrule height0pt
+\end{dvdmenupage}
+
+\begin{dvdmenupage}{a,bb,ddd}% 3 titleset 1 menu 3
+  \thispagebgimage{}{pal_bg_stripe2}
+  \kern5ex
+  \leftskip3em \rightskip3em
+  \textbf{menu 3}\par
+  \dvdtextbutton{a}{Jûmp tö m\"a\i n \includegraphics{simple_button_back} m\`enû
+    (page \pageref{MyMainMenu})}\par
+  \color{red}
+  \dvdtextbutton{bb}{Jûmp tö m\`enû 2 (page \pageref{MenuTwo})}\par
+  %\color{dvdhighlightedcolor}
+  \color{blue}
+  \dvdtextbutton{ddd}{Jûmp tö m\`enû 3}
+\end{dvdmenupage}
+
+\begin{dvdmenupage}{top,bottom,secret}% 3 titleset 1 menu 5
+  \kern5ex
+  \leftskip3em \rightskip3em
+  \textbf{menu 4, you aren't stuck here}\par
+  \par\noindent
+    \dvdframebutton{top}{\includegraphics
+      [width=.333333\paperwidth,height=.333333\paperheight]{pal_bg_stripe2}}
+  \par\noindent
+    \dvdframebutton{bottom}{\includegraphics
+      [width=.25\paperwidth,height=.25\paperheight]{pal_bg_stripe2}}
+\end{dvdmenupage}
+
+\begin{dvdmenupage}{}% 3 titleset 1 menu 4
+  \kern5ex
+  \leftskip3em \rightskip3em
+  \textbf{menu 5, you are stuck here}\par
+  \par\noindent\includegraphics
+    [width=.5\paperwidth,height=.5\paperheight]{pal_bg_stripe2}
+  \par\bigskip
+  \hrule height1.5bp
+\end{dvdmenupage}
+
+\end{document}

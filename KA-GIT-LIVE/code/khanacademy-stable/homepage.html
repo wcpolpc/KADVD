@@ -1,0 +1,94 @@
+{% extends "page_template.html" %}
+{% block pagescript %}
+<style>
+	#page_sub_nav { display: none; }
+	td { vertical-align: top; }
+</style>
+
+{% endblock pagescript %}
+{% block pagetitle %}{% endblock pagetitle %}
+{% block pagecontent %}
+<div id="homepage" style="position: relative;">
+    <div id="main-video">
+        {% youtube_player_embed video_id 480 380 %}
+    </div>
+    <div id="homepage-text">
+        <h1 class="main-headline"><a href="/#browse">Watch.</a> <a href="/exercisedashboard">Practice.</a> Learn almost anything&mdash;for free.</h1>
+        <p>
+            What started out as Sal making a few algebra videos for his cousins has grown 
+            to over <a href="/#browse">{{approx_vid_count|thousands_separated}} videos</a> and <a href="/exercisedashboard">100 self-paced exercises</a> and assessments covering 
+            everything from arithmetic to physics, finance, and history.
+        </p>
+        <p class="call-to-action-buttons"><a href="/#browse" class="call-to-action simple-button action-gradient">Browse the library</a><span style="padding: 5px 10px;">&mdash; <em>or</em> &mdash;</span><a href="/exercisedashboard" class="call-to-action simple-button action-gradient">Try an exercise</a></p>
+        <h2>Help us change education</h2>
+        <p>
+            <a href="/about/the-team">Our small team</a> is on a mission to deliver a world-class education to anyone anywhere, and you can help.
+            Take a second to <a href="/contribute">get the word out</a>, or read about how <a href="/about/getting-started#teachers">teachers</a>, <a href="/contribute">translators</a>, <a href="/contribute">donors</a>, and <a href="/contribute">everyone else</a> can contribute.
+        </p>
+        <h2 class="featured-videos">Watch a video about the Khan Academy</h2>
+    </div>
+
+    <div id="thumbnails_container">
+        <table width="100%">
+            <tr>
+                <td width="3%">
+                    <div class="thumbnails_arrow action-gradient" id="arrow-left">
+                        <div class="arrow-left-shadow"></div>
+                        <div class="arrow-left"></div>
+                    </div>
+                </td>
+                <td width="94%">
+                    <div id="thumbnails">
+                        {% for thumbnail_link_set in thumbnail_link_sets %}
+                            <div {% if not forloop.first %}style="display:none;"{% endif %}><table style="width:100%"><tr>
+                            {% for thumbnail_link in thumbnail_link_set %}
+                                <td style="width:25%" data-youtube-id="{{ thumbnail_link|hash:"youtube_id"|escape }}" {% if thumbnail_link|hash:"selected" %}class="selected"{% endif %}>
+                                    <a href="{{ thumbnail_link|hash:"href"|escape }}" class="thumbnail_link"><img src="{{ thumbnail_link|hash:"src"|escape }}" /></a>
+                                    <div class="thumbnail_label">
+                                        <a href="{{ thumbnail_link|hash:"href"|escape }}" class="thumbnail_link">{{ thumbnail_link|hash:"desc"|escape }}</a>
+                                    </div>
+                                </td>
+                            {% endfor %}
+                            </tr></table></div>
+                        {% endfor %}
+                    </div>
+                </td>
+                <td width="3%">
+                    <div class="thumbnails_arrow action-gradient" id="arrow-right">
+                        <div class="arrow-right-shadow"></div>
+                        <div class="arrow-right"></div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="clear"></div>
+<hr>
+<h2 class="main-headline">Browse our library of over {{approx_vid_count|thousands_separated}} educational videos...</h2>
+
+{% if DVD_list %}
+<ul class="menu" id="menu">
+    {% for playlist in DVD_list %}
+	    <li><a href="#{{playlist}}" class="menulink">{{playlist}}</a></li>
+    {% endfor %}
+</ul>
+{% else %}
+<div id="browse-control-anchor"></div>
+{% playlist_browser "browse" %}
+{% playlist_browser "browse-fixed" %}
+{% endif %}
+
+{{ library_content }}
+
+</div>
+
+<div id="back-to-top">
+    <a class="arrow" href="#">▲</a>
+    <a class="text" href="#">Back to Top</a>
+</div>
+{% endblock pagecontent %}
+
+{% block bottompagescript %}
+    {% homepage_javascript %}
+{% endblock bottompagescript %}

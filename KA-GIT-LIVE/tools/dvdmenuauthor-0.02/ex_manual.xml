@@ -1,0 +1,54 @@
+<dvdauthor dest="exdvd" >
+<!-- ex.xml - - dvdauthor .xml project example for menus
+     written by hand by pts@fazekas.hu at Sun Feb  4 02:40:28 CET 2007
+-->
+ <vmgm>
+  <menus>
+   <video format="pal" aspect="4:3" resolution="720x576" />
+   <pgc entry="title" >
+    <vob file="ex.menu-000001-spu.mpg" pause="inf" />
+    <button name="a" > g8=2; jump titleset 1 menu entry root; </button>
+    <button name="bb"> g8=4; jump titleset 1 menu entry root; </button>
+    <post> jump vmgm menu entry title; </post>
+   </pgc>
+  </menus>
+ </vmgm>
+ <titleset>
+  <menus>
+   <video format="pal" aspect="4:3" resolution="720x576" />
+   <pgc entry="root" > <!-- titleset 1 menu 1 -->
+    <pre>
+      if (g8 eq 2) jump menu 2;
+      if (g8 eq 3) jump menu 3;
+      if (g8 eq 4) jump menu 4;
+      jump vmgm menu entry title;
+    </pre>
+   </pgc>
+   <pgc> <!-- titleset 1 menu 2 -->
+    <vob file="ex.menu-000002-spu.mpg" pause="inf" />
+    <button name="a" > jump vmgm menu 1; </button>
+    <button name="bb"> jump menu 2; </button>
+    <button name="ccc"> jump menu 3; </button>
+    <post> jump vmgm menu 1; </post>
+   </pgc>
+   <pgc> <!-- titleset 1 menu 3 -->
+    <vob file="ex.menu-000003-spu.mpg" pause="inf" />
+    <button name="a" > jump vmgm menu 1; </button>
+    <button name="bb"> jump menu 2; </button>
+    <button name="ddd"> jump title 1 chapter 1; </button>
+    <post> jump vmgm menu 1; </post>
+   </pgc>
+   <pgc> <!-- titleset 1 menu 4 -->
+    <vob file="ex.menu-000004-spu.mpg" pause="inf" />
+    <post> jump vmgm menu 1; </post>
+   </pgc>
+  </menus>
+  <titles>
+   <video format="pal" aspect="4:3" resolution="720x576" />
+   <pgc pause="0" >
+    <vob file="title1.mpg" pause="0" chapters="00:00:00.000" />
+    <post> call vmgm menu entry title; </post>
+   </pgc>
+  </titles>
+ </titleset>
+</dvdauthor>

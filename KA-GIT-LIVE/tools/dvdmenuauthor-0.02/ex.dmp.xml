@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="ISO-8859-2"?>
+<!-- ex.dmp.xml - - dvdmenuauthor .xml project example for menus
+     written by hand by pts@fazekas.hu at Mon Feb  5 19:36:36 CET 2007
+-->
+<dvdmenuauthor dest="exdvd"
+ genmpeg:audio-codec="ac3"
+ genmpeg:video-with="ffmpeg">
+ <tex:header>
+    % TeX comment &lt;nice&gt;
+    \documentclass{article}
+    <!-- XML comment, trailing spaces+newline is also removed -->
+    \usepackage{dvdmenu}
+    \usepackage{graphicx}
+    \usepackage{lmodern}
+    \usepackage{t1enc}
+    \usepackage{color}
+    \autoloadXinputenc
+    %\definecolor{dvdselectedcolor}{rgb}{0,1,0}
+    %\definecolor{dvdhighlightedcolor}{rgb}{0,0,1}
+    %\dvdbuttonframesep2pt
+ </tex:header>
+ <tex:footer>
+   % Bye!
+   \end{document}
+ </tex:footer>
+ <vmgm>
+  <menus>
+   <video format="pal" aspect="4:3" resolution="720x576" />
+   <pgc entry="title" > <!-- vmgm menu 1 -->
+    <tex:page>
+\thispagecolor{yellow}
+\kern5ex
+\leftskip3em \rightskip3em
+\fontfamily{phv}\bfseries
+vmgm main menu Hi!\par
+\dvdtextbutton{a}{Jűmp tö m\`enű 2}\par
+\dvdtextbutton{bb}{Jűmp tö m\`enű 4 W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W}\par
+\dvdtextbutton{ccc6}{Jűmp tö m\`enű 6}\par
+    </tex:page>
+    <vob tex:file="" pause="inf" />
+    <button name="a" > g8=2; jump titleset 1 menu entry root; </button>
+    <button name="bb"> g8=4; jump titleset 1 menu entry root; </button>
+    <button name="ccc6"> g8=6; jump titleset 1 menu entry root; </button>
+    <post> jump vmgm menu entry title; </post>
+   </pgc>
+  </menus>
+ </vmgm>
+ <titleset>
+  <menus>
+   <video format="pal" aspect="4:3" resolution="720x576" />
+   <pgc entry="root" > <!-- titleset 1 menu 1 -->
+    <pre>
+      if (g8 eq 2) jump menu 2;
+      if (g8 eq 3) jump menu 3;
+      if (g8 eq 4) jump menu 4;
+      if (g8 eq 5) jump menu 5;
+      if (g8 eq 6) jump menu 6;
+      jump vmgm menu entry title;
+    </pre>
+   </pgc>
+   <pgc> <!-- titleset 1 menu 2 -->
+    <tex:page>
+  \thispagebgimage{}{pal_bg_light}
+  \vfil
+  \leftskip3em \rightskip3em
+  \hrule height0pt
+  \vskip-\parskip
+  \textbf{menu 2}\par
+  \dvdtextbutton{a}{Jűmp tö m\"a\i n m\`enű}\par
+  \dvdtextbutton{bb}{Jűmp tö m\`enű 2}\par
+  %\pdfliteral direct{1 0 0 1 -10000 -10000 cm}%
+  \dvdtextbutton{ccc}{Jűmp tö m\`enű 3}
+  \hrule height0pt
+    </tex:page>
+    <vob tex:file="" pause="inf" />
+    <button name="a" > jump vmgm menu 1; </button>
+    <button name="bb"> jump menu 2; </button>
+    <button name="ccc"> jump menu 3; </button>
+    <post> jump vmgm menu 1; </post>
+   </pgc>
+   <pgc> <!-- titleset 1 menu 3 -->
+    <tex:page>
+      \thispagebgimage{}{pal_bg_stripe2}
+      \kern5ex
+      \leftskip3em \rightskip3em
+      \textbf{menu 3}\par
+      \dvdtextbutton{a}{Jűmp tö m\"a\i n
+        \includegraphics{simple_button_back} m\`enű}\par
+      \color{red}
+      \dvdtextbutton{bb}{Jűmp tö m\`enű 2}\par
+      %\color{dvdhighlightedcolor}
+      \color{blue}
+      \dvdtextbutton{ddd}{Jűmp tö m\`enű 3}
+    </tex:page>
+    <vob tex:file="" pause="inf" />
+    <button name="a" > jump vmgm menu 1; </button>
+    <button name="bb"> jump menu 5; </button>
+    <button name="ddd"> jump title 1 chapter 1; </button>
+    <post> jump vmgm menu 1; </post>
+   </pgc>
+   <pgc> <!-- titleset 1 menu 4 -->
+    <tex:page>
+  \kern5ex
+  \leftskip3em \rightskip3em
+  \textbf{menu 4, you aren't stuck here}\par
+  \par\noindent
+    \dvdframebutton{top}{\includegraphics
+      [width=.333333\paperwidth,height=.333333\paperheight]{pal_bg_stripe2}}
+  \par\noindent
+    \dvdframebutton{bottom}{\includegraphics
+      [width=.25\paperwidth,height=.25\paperheight]{pal_bg_stripe2}}
+    </tex:page>
+    <vob tex:file="" pause="inf" />
+    <button name="top" > jump vmgm menu 1; </button>
+    <button name="bottom"> jump menu 2; </button>
+    <post> jump vmgm menu 1; </post>
+   </pgc>
+   <pgc> <!-- titleset 1 menu 5 -->
+    <tex:page>
+  \kern5ex
+  \leftskip3em \rightskip3em
+  \textbf{menu 5, you are stuck here}\par
+  \par\noindent\includegraphics
+    [width=.5\paperwidth,height=.5\paperheight]{pal_bg_stripe2}
+  \par\bigskip
+  \hrule height1.5bp
+    </tex:page>
+    <vob tex:file="" pause="inf" />
+    <post> jump vmgm menu 1; </post>
+   </pgc>
+   <pgc> <!-- titleset 1 menu 6 -->
+    <tex:prepage>
+      \thispagebgimage{}{pal_bg_light}
+      \thispagetemplate{palthumbsix}
+      \menucaption{Fazekas szalagavató 1998.\ december}
+    </tex:prepage>
+    <vob tex:file="" pause="inf" />
+    <button name="e1" tex:image="design/pal1.png" tex:caption="a szalagtűzés \emph{előtt}"> jump vmgm menu 1; </button>
+    <button name="e2" tex:image="design/pal2.png" tex:caption="szalagtűzés"> jump menu 2; </button>
+    <button name="e3" tex:image="design/pal3.png" tex:caption="osztálytáncok"> jump menu 3; </button>
+    <button name="e4" tex:image="design/pal4.png" tex:caption="egyéb táncok"> jump menu 4; </button>
+    <button name="e5" tex:image="design/pal5.png" tex:caption="videófelvételek"> jump menu 5; </button>
+    <button name="e6" tex:image="design/pal6.png" tex:caption="keret"> jump menu 6; </button>
+    <button name="prev" tex:dummy=""> jump vmgm menu 1; </button>
+    <button name="back" tex:dummy=""> jump vmgm menu 1; </button>
+    <button name="next" tex:dummy=""> jump vmgm menu 1; </button>
+    <post> jump vmgm menu 1; </post>
+   </pgc>
+  </menus>
+  <titles>
+   <video format="pal" aspect="4:3" resolution="720x576" />
+   <pgc pause="0" >
+    <vob file="title1.mpg" pause="0" chapters="00:00:00.000" />
+    <post> call vmgm menu entry title; </post>
+   </pgc>
+  </titles>
+ </titleset>
+</dvdmenuauthor>

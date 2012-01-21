@@ -39,6 +39,7 @@ def main():
     parser.add_option("-d","--download", default='n', help="Cleans the output")
     parser.add_option("-i", "--input", default='', help="input DVDAuthor file")
     parser.add_option("-t", "--menutext", default='', help="Location of the menu text file")
+    parser.add_option("-x", "--sample", default='', help="Perform a sample run")
     
     
     (options, args) = parser.parse_args()
@@ -117,8 +118,9 @@ def getPlayListFromAPI(options):
             filename = options.output + "/" + name + ".mp4"; 
             names.append(name);
             #TESTING
+            
             count = count + 1;
-            if(count > 4):
+            if(count > 4 and options.sample=='y'):
                 return;
             ##if the file already exists and the clean option is not used don't bother re-downloading
             if os.path.exists(filename):
@@ -133,7 +135,6 @@ def getPlayListFromAPI(options):
                     continue;
             else: 
                 downloadAndConvertFile(options, playlistfile, filename)
-        renderBackground(options,names);
            
                 
                 

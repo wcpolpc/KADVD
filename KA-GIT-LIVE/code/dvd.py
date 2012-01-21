@@ -54,11 +54,11 @@ def main():
             raise  IOError("File not found" + options.input);
         #if options.skip=='n':
         #    downloadVideos(options);
-        #createWorkingFolder(options);
-        #getPlayListFromAPI(options);
-        #checkForRequiredMpegs(options);
+        createWorkingFolder(options);
+        getPlayListFromAPI(options);
+        checkForRequiredMpegs(options);
         renderBackground(options)
-        #runDVDAuth(options);
+        runDVDAuth(options);
         
 def createWorkingFolder(options):
      if  not os.path.exists(options.output):
@@ -91,7 +91,8 @@ def checkForRequiredMpegs(options):
                 mpegs.append(value)
     
     for mpeg in mpegs:
-        if(mpeg == "menu.mpg"):
+        ##ignore background mpeds, we will create them later
+        if("background" in mpeg):
             continue;
         fileneeded = options.output + "/" + mpeg;
         if not os.path.exists(fileneeded):
@@ -168,7 +169,7 @@ def convertvideo(options, filename):
 
 
 def renderBackground(options):
-    im = Image.open(options.background)
+    
 
     
     #TODO package font 
@@ -177,23 +178,29 @@ def renderBackground(options):
     
     text = f.read();
     menus=text.split('#')
-    position=14;
+   
     font = ImageFont.truetype(fontFile, 16)
+    menuindex=0;
     for menu in menus:
+            position=14;
+            im = Image.open(options.background)
+            menuindex=menuindex+1;
             draw = ImageDraw.Draw(im)
             menuItems=menu.split(',')
             for item in menuItems:
                 draw.text((60, position), item, font=font, fill=(255,255,255))
                 position=position+40      
             del draw
-            im.save(options.output + '/back.jpg', "JPEG",quality=95)
+            backName="background"+str(menuindex); #eg bacground1
+            backFile=options.output +"/"+backName+".jpg";
+            im.save(backFile , "JPEG",quality=95)
+            createMainMenu(options,backFile,backName);
     
     
 
             
-def createMainMenu(options):
+def createMainMenu(options, backgroundFile,backName):
     #Add text to the background
-   renderBackground(options);
    menufile = options.output + "/menu.xml";
    outputMessage("Creating background menu. with menu file: " +menufile)
    outm2v = options.output + '/menu.m2v';
@@ -202,7 +209,7 @@ def createMainMenu(options):
    #             '|','mpeg2enc','-I','0','-f','8','-n','p','-o',outm2v,'|','mplex','-f','8','-o','/dev/stdout',outm2v,'../dvd_menus/silent.mp2','|','spumux','-v','2',menufile,'>',options.output+'menu.mpg'];
    
    ##TODO SLEEPS are bad..maybe there is something better?
-   p1 = Popen(['jpegtopnm', options.output + '/back.jpg'], stdout=PIPE)
+   p1 = Popen(['jpegtopnm', backgroundFile], stdout=PIPE)
    time.sleep(1)
    p2 = Popen(['ppmtoy4m', '-n', '1', '-F', '25:1', '-I', 't', '-A', '59:54', '-L', '-S', '420jpeg'], stdin=p1.stdout, stdout=PIPE)
    time.sleep(1)
@@ -210,7 +217,7 @@ def createMainMenu(options):
    time.sleep(1)
    p4 = Popen(['mplex', '-f', '8', '-o', '/dev/stdout', outm2v, '../dvd_menus/silent.mp2'], stdin=p3.stdout, stdout=PIPE)
    time.sleep(1)
-   FILE = open(options.output + '/menu.mpg', "w")
+   FILE = open(options.output + '/'+backName+'.mpeg', "w")
    time.sleep(1)
    p5 = Popen(['spumux', '-v', '2', menufile, ], stdin=p4.stdout, stdout=FILE)
    time.sleep(1)

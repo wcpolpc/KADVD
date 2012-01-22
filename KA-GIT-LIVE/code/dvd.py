@@ -22,6 +22,9 @@ import httplib
 import simplejson as json
 import urllib
 import re
+import math
+
+globtitles=[];
 
 def main():
     
@@ -115,6 +118,8 @@ def getPlayListFromAPI(options):
         for item in playlistitems:
             playlistfile = item['download_urls']['mp4'];
             name = item['readable_id'];
+            global globtitle;
+            globtitles.append(item['title']);
             filename = options.output + "/" + name + ".mp4"; 
             names.append(name);
             #TESTING
@@ -182,20 +187,61 @@ def renderBackground(options):
    
     font = ImageFont.truetype(fontFile, 16)
     menuindex=0;
-    for menu in menus:
-            position=14;
-            im = Image.open(options.background)
-            menuindex=menuindex+1;
-            draw = ImageDraw.Draw(im)
-            menuItems=menu.split(',')
-            for item in menuItems:
-                draw.text((60, position), item, font=font, fill=(255,255,255))
-                position=position+40      
-            del draw
-            backName="background"+str(menuindex); #eg bacground1
+#    for menu in menus:
+#            position=14;
+#            im = Image.open(options.background)
+#            menuindex=menuindex+1;
+#            draw = ImageDraw.Draw(im)
+#            menuItems=menu.split(',')
+#            for item in menuItems:
+#                draw.text((60, position), item, font=font, fill=(255,255,255))
+#                position=position+40      
+#            del draw
+#            backName="background"+str(menuindex); #eg bacground1
+#            backFile=options.output +"/"+backName+".jpg";
+#            im.save(backFile , "JPEG",quality=95)
+#            createMainMenu(options,backFile,backName);
+
+    global globtitles;
+    im = Image.open(options.background);
+    position=14;
+    draw = ImageDraw.Draw(im)
+    titleindex=0;
+    menuindex=0;
+    for title in globtitles:
+         draw.text((60, position), title, font=font, fill=(255,255,255))
+         position=position+40
+         titleindex=titleindex+1; 
+         if(titleindex==14):
+            backName="background"+str(menuindex); #eg bacground1    
             backFile=options.output +"/"+backName+".jpg";
-            im.save(backFile , "JPEG",quality=95)
-            createMainMenu(options,backFile,backName);
+            im.save(backFile , "JPEG",quality=95)   ;
+            im = Image.open(options.background);
+            position=0;
+            menuindex=menuindex+1;
+            del draw;
+            draw = ImageDraw.Draw(im)
+            titleindex=0;
+         
+        
+        
+    
+#    titleindex=0;
+#    for menu in range(numerOfMenus):
+#        
+#        draw = ImageDraw.Draw(im)
+#        for title in 14:
+#           
+#            position=position+40 
+#            titleindex=titleindex+1;
+#        backName="background"+str(menu); #eg bacground1    
+#        backFile=options.output +"/"+backName+".jpg";
+#        im.save(backFile , "JPEG",quality=95)   
+#        im = Image.open(options.background)
+       
+         
+            
+        
     
     
 

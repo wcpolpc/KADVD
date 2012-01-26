@@ -24,6 +24,7 @@ import urllib
 import re
 import math
 
+readabletitles=[];
 globtitles=[];
 
 def main():
@@ -116,7 +117,9 @@ def getPlayListFromAPI(options):
         for item in playlistitems:
             playlistfile = item['download_urls']['mp4'];
             name = item['readable_id'];
-            global globtitle;
+            global readabletitles;
+            readabletitles.append(name);
+            global globtitles;
             globtitles.append(item['title']);
             filename = options.output + "/" + name + ".mp4"; 
             names.append(name);
@@ -239,12 +242,44 @@ def renderBackground(options):
     
     
     
-    
     outputDVDXML=options.output + '/dvd.xml';
     f = open(outputDVDXML, "w")
     f.write(text);
     f.close()
     del draw;
+    
+    global readabletitles;
+    
+    titleText="";                  
+    titles="";
+    chapterindex=0;
+    for menu in range(menuindex):
+        f = open("../jobs/template-titleset.xml", "r")
+        text = f.read()
+        text = text.rstrip();
+        f.close();
+        chapterindex+=chapterindex+1;
+        mpegindex=1;
+        
+        for title in range(0,13):
+             test=mpegindex*chapterindex;
+             titleText+="<pgc><vob file=\""+readabletitles[test]+".mpeg\" pause=\"3\" /></pgc>\n";
+             mpegindex=mpegindex+1
+        titles= titles+ text.replace('@a',titleText);
+    
+    
+    f = open(outputDVDXML, "r")
+    text = f.read()
+    text = text.rstrip();
+    text = text.replace('@b',titles);
+    f.close();
+    
+    f = open(outputDVDXML, "w")
+    f.write(text);
+    f.close()
+    
+        
+        
     
    
         

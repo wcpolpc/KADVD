@@ -4,6 +4,7 @@ Created on 12 Jan 2012
 
 @author: dev
 '''
+from libxml2 import readFile
 
 """ Wrapper for uploading/downloading all the system-wide data """
 
@@ -29,7 +30,7 @@ globtitles=[];
 
 def main():
     
-    parser = OptionParser(usage="%prog [options] -i [] -o [] -p []",
+    parser = OptionParser(usage="%prog [options] -t [] -o [] -p []",
                           description="Compiles DVDs for Khan Academy")
     parser.add_option("-p", "--playlist", default="",
                       help="The playlist you want to transform into a DVD")
@@ -41,7 +42,7 @@ def main():
     parser.add_option("-c", "--clean", default='n', help="Cleans the output")
     parser.add_option("-m", "--remake", default='n', help="Reconverts mp4 videos to mpeg")
     parser.add_option("-d","--download", default='n', help="Cleans the output")
-    parser.add_option("-t", "--template", default='', help="input DVDAuthor template")
+    parser.add_option("-t", "--common", default='', help="directory for common template xml and background image files")
     parser.add_option("-x", "--sample", default='', help="Perform a sample run")
     parser.add_option("-r", "--recreate", default='n', help="Recreate menu mpegs")
     
@@ -51,17 +52,17 @@ def main():
     ##TODO checks!
     
     
-    if options.playlist == "" or options.output == "" or options.template == "" :
+    if options.playlist == "" or options.output == "" or options.common == "" :
         parser.print_help()
         return
     else:
-        if  not os.path.exists(options.template):
-            raise  IOError("File not found" + options.input);
+        if  not os.path.exists(options.common):
+            raise  IOError("File not found" + options.common);
         #if options.skip=='n':
         #    downloadVideos(options);
         createWorkingFolder(options);
         getPlayListFromAPI(options);
-        renderBackground(options)
+        createMenus(options)
         checkForRequiredMpegs(options);
         runDVDAuth(options);
        
@@ -175,25 +176,97 @@ def convertvideo(options, filename):
     time.sleep(2)
 
 
-def renderBackground(options):
+def createMenus(options):
+    createRootMenu(options);
+    createTitlesets(options);
+    createTitles(options);
+    createBackgroundMenuImages(options);
+    
+    
+            
     
 
+def createRootMenu(options):
+    #create the main menu
+    im = Image.open(options.background);
+    draw = ImageDraw.Draw(im)
+    position=14;
+    font=getFont();
+    menuplus=1;
+    for title in range(len(globtitles)):
+        if(title%13==0):
+            draw.text((60, position), "Videos Part "+ str(menuplus), font=font, fill=(255,255,255))
+            menuplus=menuplus+1;
+            position=position+40
+    #draw the final text
+    draw.text((60, position), "Part "+ str(menuplus), font=font, fill=(255,255,255))
+    backFile=options.output +"/mainmenu.jpg";
+    im.save(backFile , "JPEG",quality=95)   ;
+    createMainMenu(options, backFile,"mainmenu")
+         
+
+def createTitlesets(options):
     
+    buttonText="";#the text for the template controll file
+    titleplus=1;
+    for title in range(len(globtitles)):
+        if(title%13==0):
+            buttonText=buttonText+"<button>jump titleset "+str(titleplus)+" menu;</button>"+"\n";
+            titleplus=titleplus+1;
+            
+    #write the final one
+    buttonText=buttonText+"<button>jump titleset "+str(titleplus)+" menu;</button>"+"\n";
+    text = readFile(options.common+"/template.xml")
+    text = text.replace('@a',buttonText);
+    outputDVDXML=options.output + '/dvd.xml';
+    writeToFile(outputDVDXML, text)
+    
+    
+def writeToFile(mfile,text):      
+    
+    f = open(mfile, "w")
+    f.write(text);
+    f.close()
+def readFile(mfile):
+    f = open(mfile, "r")
+    text = f.read()
+    text = text.rstrip();
+    f.close();
+    return text;
+
+def createTitles(options):
+    titleText="";                  
+    titles="";
+    outputDVDXML=options.output+"/dvd.xml";
+    for title in range(len(readabletitles)):
+        titleText+="<pgc><vob file=\""+readabletitles[title]+".mpeg\" pause=\"3\" /></pgc>\n";
+        if(title%13==0):
+            text=readFile(options.common+"/template-titles.xml")
+            titles= titles+ text.replace('@a',titleText);
+            titleText=""
+    
+    text=readFile(outputDVDXML)
+    text = text.replace('@b',titles);
+    writeToFile(outputDVDXML, text)
+    
+def getFont():
     #TODO package font 
     fontFile = "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf"
     font = ImageFont.truetype(fontFile, 16)
-  
-    global globtitles;
+    return font;
+        
+        
+    
+def createBackgroundMenuImages(options):
     im = Image.open(options.background);
     position=14;
     draw = ImageDraw.Draw(im)
-    titleindex=0;
     menuindex=0;
-    for title in globtitles:
-         draw.text((60, position), title, font=font, fill=(255,255,255))
-         position=position+40
-         titleindex=titleindex+1; 
-         if(titleindex==14):##14 is the number of items per menu
+    font=getFont();
+    for title in range(len(globtitles)):
+        draw.text((60, position), globtitles[title], font=font, fill=(255,255,255))
+        position=position+40
+        if(title%13==0):##14 is the number of items per menu
             backName="background"+str(menuindex); #eg bacground1    
             backFile=options.output +"/"+backName+".jpg";
             im.save(backFile , "JPEG",quality=95)   ;
@@ -202,90 +275,13 @@ def renderBackground(options):
             menuindex=menuindex+1;
             del draw;
             draw = ImageDraw.Draw(im)
-            titleindex=0;
             createMainMenu(options,backFile,backName);
-            
     #write the final menu
     backName="background"+str(menuindex); #eg bacground1    
     backFile=options.output +"/"+backName+".jpg";
     im.save(backFile , "JPEG",quality=95)   ;
     del draw;
-    
-    #create the main menu
-    im = Image.open(options.background);
-    draw = ImageDraw.Draw(im)
-    position=14;
-    menuplus=0;
-    buttonText="";#the text for the template controll file
-    for menu in range(menuindex):
-        menuplus=menu+1
-        draw.text((60, position), "Part "+ str(menuplus), font=font, fill=(255,255,255))
-        position=position+40
-        buttonText=buttonText+"<button>jump titleset "+str(menuplus)+" menu;</button>"+"\n";
-    
-    ##remainng buttons
-    for menu in range(menuindex,14):
-        draw.text((60, position), "None "+ str(menuplus), font=font, fill=(255,255,255))
-        position=position+40
-        buttonText=buttonText+"<button>jump titleset 1 menu;</button>"+"\n";
-        
-    backFile=options.output +"/mainmenu.jpg";
-    im.save(backFile , "JPEG",quality=95)   ;
-    createMainMenu(options,backFile,backName);
-    
-    f = open(options.template, "r")
-    text = f.read()
-    text = text.rstrip();
-    text = text.replace('@a',buttonText);
-    f.close();
-    
-    
-    
-    
-    outputDVDXML=options.output + '/dvd.xml';
-    f = open(outputDVDXML, "w")
-    f.write(text);
-    f.close()
-    del draw;
-    
-    global readabletitles;
-    
-    titleText="";                  
-    titles="";
-    chapterindex=0;
-    for menu in range(menuindex):
-        f = open("../jobs/template-titleset.xml", "r")
-        text = f.read()
-        text = text.rstrip();
-        f.close();
-        chapterindex+=chapterindex+1;
-        mpegindex=1;
-        
-        for title in range(0,13):
-             test=mpegindex*chapterindex;
-             titleText+="<pgc><vob file=\""+readabletitles[test]+".mpeg\" pause=\"3\" /></pgc>\n";
-             mpegindex=mpegindex+1
-        titles= titles+ text.replace('@a',titleText);
-    
-    
-    f = open(outputDVDXML, "r")
-    text = f.read()
-    text = text.rstrip();
-    text = text.replace('@b',titles);
-    f.close();
-    
-    f = open(outputDVDXML, "w")
-    f.write(text);
-    f.close()
-    
-        
-        
-    
-   
-        
-    
-    #
-    #<button>jump titleset 1 menu;</button>
+    createMainMenu(options, backFile, backName);
     
 
          
@@ -296,37 +292,35 @@ def renderBackground(options):
 
             
 def createMainMenu(options, backgroundFile,backName):
-	#Add text to the background
-   menufile = options.output + "/menu.xml";
-   outputMessage("Creating background menu. with menu file: " +menufile)
-   outm2v = options.output + '/menu.m2v';
-   outputfile=options.output + '/'+backName+'.mpeg';
-   #TODO add clean flag
-   if os.path.exists(outputfile) and options.recreate == 'n':
-	   outputMessage("Menu MPEG "+outputfile+"already exists, will not recreate unless clean option specified")
-	   return;
-   #no interlacing -I 0
-   # call_args = ['jpegtopnm',options.output+'/back.jpg','|','ppmtoy4m','-n','1','-F','25:1','-I','t','-A','59:54','-L','-S','420mpeg2',
-   #			 '|','mpeg2enc','-I','0','-f','8','-n','p','-o',outm2v,'|','mplex','-f','8','-o','/dev/stdout',outm2v,'../dvd_menus/silent.mp2','|','spumux','-v','2',menufile,'>',options.output+'menu.mpg'];
+    #Add text to the background
+    menufile = options.output + "/menu.xml";
+    outputMessage("Creating background menu. with menu file: " +menufile)
+    outm2v = options.output + '/menu.m2v';
+    outputfile=options.output + '/'+backName+'.mpeg';
+    #TODO add clean flag
+    if os.path.exists(outputfile) and options.recreate == 'n':
+        outputMessage("Menu MPEG "+outputfile+"already exists, will not recreate unless clean option specified")
+        return;
+    #no interlacing -I 0
+    # call_args = ['jpegtopnm',options.output+'/back.jpg','|','ppmtoy4m','-n','1','-F','25:1','-I','t','-A','59:54','-L','-S','420mpeg2',
+    #             '|','mpeg2enc','-I','0','-f','8','-n','p','-o',outm2v,'|','mplex','-f','8','-o','/dev/stdout',outm2v,'../dvd_menus/silent.mp2','|','spumux','-v','2',menufile,'>',options.output+'menu.mpg'];
    
-   ##TODO SLEEPS are bad..maybe there is something better?
-   p1 = Popen(['jpegtopnm', backgroundFile], stdout=PIPE)
-   time.sleep(1)
-   p2 = Popen(['ppmtoy4m', '-n', '1', '-F', '25:1', '-I', 't', '-A', '59:54', '-L', '-S', '420jpeg'], stdin=p1.stdout, stdout=PIPE)
-   time.sleep(1)
-   p3 = Popen(['mpeg2enc', '-I', '0', '-f', '8', '-n', 'p', '-o', outm2v], stdin=p2.stdout, stdout=PIPE)
-   time.sleep(1)
-   p4 = Popen(['mplex', '-f', '8', '-o', '/dev/stdout', outm2v, '../dvd_menus/silent.mp2'], stdin=p3.stdout, stdout=PIPE)
-   time.sleep(1)
-   FILE = open(outputfile, "w")
-   time.sleep(1)
-   p5 = Popen(['spumux', '-v', '2', menufile, ], stdin=p4.stdout, stdout=FILE)
-   time.sleep(1)
-   FILE.close();
-   output = p5.communicate()[0]
-   outputMessage(output);
-   
-   #runCommand(call_args)
+    ##TODO SLEEPS are bad..maybe there is something better?
+    p1 = Popen(['jpegtopnm', backgroundFile], stdout=PIPE)
+    time.sleep(1)
+    p2 = Popen(['ppmtoy4m', '-n', '1', '-F', '25:1', '-I', 't', '-A', '59:54', '-L', '-S', '420jpeg'], stdin=p1.stdout, stdout=PIPE)
+    time.sleep(1)
+    p3 = Popen(['mpeg2enc', '-I', '0', '-f', '8', '-n', 'p', '-o', outm2v], stdin=p2.stdout, stdout=PIPE)
+    time.sleep(1)
+    p4 = Popen(['mplex', '-f', '8', '-o', '/dev/stdout', outm2v, '../dvd_menus/silent.mp2'], stdin=p3.stdout, stdout=PIPE)
+    time.sleep(1)
+    FILE = open(outputfile, "w")
+    time.sleep(1)
+    p5 = Popen(['spumux', '-v', '2', menufile, ], stdin=p4.stdout, stdout=FILE)
+    time.sleep(1)
+    FILE.close();
+    output = p5.communicate()[0]
+    outputMessage(output);
    
 def runDVDAuth(options):
     outputMessage("Running dvdauthor...");

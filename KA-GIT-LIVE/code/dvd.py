@@ -191,7 +191,7 @@ def createRootMenu(options):
 	font=getFont();
 	menuplus=1;
 	for title in range(len(globtitles)):
-		if(title%13==0):
+		if(title%14==0 and title!=0):
 			draw.text((60, position), "Videos Part "+ str(menuplus), font=font, fill=(255,255,255))
 			menuplus=menuplus+1;
 			position=position+40
@@ -207,7 +207,7 @@ def createTitlesets(options):
 	buttonText="";#the text for the template control file
 	titleplus=1;
 	for title in range(len(globtitles)):
-		if(title%13==0):
+		if(title%14==0 and title!=0):
 			buttonText=buttonText+"<button>jump titleset "+str(titleplus)+" menu;</button>"+"\n";
 			titleplus=titleplus+1;
 			
@@ -242,12 +242,13 @@ def createTitles(options):
 		titleText=titleText+"<pgc><vob file=\""+readabletitles[title]+".mpeg\" pause=\"3\" /></pgc>\n";
 		buttonText=buttonText+"<button>jump title "+str(buttonindex)+";</button>"
 		buttonindex=buttonindex+1;
-		if(title%13==0):
+		if(title%14==0 and title!=0):
 			text=readFile(options.common+"/template-titles.xml")
 			first=  text.replace('@a',buttonText);
 			second= first.replace('@x',str(titleindex))
 			titles=titles+ second.replace('@b',titleText);
 			titleText=""
+			buttonText=""
 			buttonindex=1;
 			titleindex=titleindex+1
 	
@@ -272,7 +273,7 @@ def createBackgroundMenuImages(options):
 	for title in range(len(globtitles)):
 		draw.text((60, position), globtitles[title], font=font, fill=(255,255,255))
 		position=position+40
-		if(title%13==0):##14 is the number of items per menu
+		if(title%14==0 and title!=0):##14 is the number of items per menu
 			backName="background"+str(menuindex); #eg bacground1	
 			backFile=options.output +"/"+backName+".jpg";
 			im.save(backFile , "JPEG",quality=95)   ;

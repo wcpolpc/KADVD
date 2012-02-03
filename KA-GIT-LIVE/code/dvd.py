@@ -45,6 +45,7 @@ def main():
 	parser.add_option("-t", "--common", default='', help="directory for common template xml and background image files")
 	parser.add_option("-x", "--sample", default='', help="Perform a sample run")
 	parser.add_option("-r", "--recreate", default='n', help="Recreate menu mpegs")
+	parser.add_option("-f", "--redownload", default='y', help="Automatically re-download failed downloads")
 	
 	
 	(options, args) = parser.parse_args()
@@ -70,15 +71,14 @@ def main():
 		runDVDAuth(options);
 		
 def createWorkingFolder(options):
-	 if  not os.path.exists(options.output):
-		 outputMessage("Creating Output")
-		 os.makedirs(options.output)
-	 #if clean specified recreate it   
-	 if options.clean == 'y':
-		 outputMessage("Cleaning Output")
-		 shutil.rmtree(options.output, ignore_errors=True);
-		 os.makedirs(options.output)
-	 
+	if  not os.path.exists(options.output):
+		outputMessage("Creating Output")
+		os.makedirs(options.output)
+	#if clean specified recreate it   
+	if options.clean == 'y':
+		outputMessage("Cleaning Output")
+		shutil.rmtree(options.output, ignore_errors=True);
+		os.makedirs(options.output)
 
 def checkForRequiredMpegs(options):
 	f = open(options.output+"/dvd.xml", "r")
@@ -106,16 +106,17 @@ def checkForRequiredMpegs(options):
 def getPlayListFromAPI(options):
 	httpServ = httplib.HTTPConnection("www.khanacademy.org", 80)
 	httpServ.connect()
-	httpServ.request('GET', "/api/v1/playlists/Algebra/videos")
+	httpServ.request('GET', "/api/v1/playlists/"+options.playlist+"/videos")
 
 	response = httpServ.getresponse()
 	if response.status == httplib.OK:
-		print "Output from HTML request"
 		result = response.read();
 		playlistitems = json.loads(result);
 		filename = '';
 		count = 0;
 		names=[];
+		if(len(playlistitems)==0):
+			raise IOError('API Playlist is empty');
 		for item in playlistitems:
 			playlistfile = item['download_urls']['mp4'];
 			name = item['readable_id'];
@@ -139,19 +140,42 @@ def getPlayListFromAPI(options):
 					downloadAndConvertFile(options, playlistfile, filename)
 				else:
 					outputMessage("MP4 file already exists will not bother to re-download it: " + filename)
+					##check file sizes match anyway before converting
+					checkFileDownloadedCorrectly(options,playlistfile,filename);
 					convertvideo(options, filename)
 					continue;
 			else: 
 				downloadAndConvertFile(options, playlistfile, filename)
-		   
+	else:
+		raise IOError("Playlist API unavailable");
 				
-				
+def checkFileDownloadedCorrectly(options, playlistfile, filename):	
+	
+	
+	#todo max retries
+	site = urllib.urlopen(playlistfile)
+	meta = site.info()
+	expected=int(meta.getheaders("Content-Length")[0]);	
+	outputMessage ("Content-Length for file :"+playlistfile+" is "+ str(expected))	
+	f = open(filename, "r")
+	actual=len(f.read())
+	outputMessage("File on disk: "+ str(actual))
+	f.close()	
+	if(expected != actual):
+		if(options.redownload=='y'):
+			outputMessage ("Incomplete download detected will retry file :"+ filename +" from url " +playlistfile);
+			downloadAndConvertFile(options, playlistfile,filename);
+		else:
+			raise IOError("Downloaded file: " +filename+"  does match expected size: " + str(expected))	
+	
 						# do nothing for existing files
 				
 def downloadAndConvertFile(options, playlistfile, filename):  
 	outputMessage("Retrieving file ..." + playlistfile);
 	urllib.urlretrieve(playlistfile, filename);
-	convertvideo(options, filename);		  
+	convertvideo(options, filename);
+	checkFileDownloadedCorrectly(options,playlistfile,filename);
+	
 			
 def outputMessage(message):
 	sys.stderr.write("-----------------------------------------------------------------------\n");
@@ -238,7 +262,7 @@ def createTitles(options):
 	buttonText=""
 	buttonindex=1;
 	titleindex=1;
-	for title in range(len(readabletitles)):
+	for title in range(len(globtitles)):
 		titleText=titleText+"<pgc><vob file=\""+readabletitles[title]+".mpeg\" pause=\"3\" /></pgc>\n";
 		buttonText=buttonText+"<button>jump title "+str(buttonindex)+";</button>"
 		buttonindex=buttonindex+1;

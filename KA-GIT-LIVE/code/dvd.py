@@ -27,6 +27,8 @@ import math
 
 readabletitles=[];
 globtitles=[];
+totalDVDSize=0;
+downloadLinks=[];
 
 def main():
 	
@@ -61,14 +63,19 @@ def main():
 			raise  IOError("File not found" + options.common);
 		#if options.skip=='n':
 		#	downloadVideos(options);
- 		createWorkingFolder(options);
- 		getPlayListFromAPI(options);
-		createRootMenu(options);
-		createTitlesets(options);
-		createTitles(options);
-		createBackgroundMenuImages(options);
-		checkForRequiredMpegs(options);
-		runDVDAuth(options);
+		createWorkingFolder(options);
+		getPlayListFromAPI(options);
+		downloadVideos(options);
+		dvdpoints=convertVideos(options)
+		for point in dvdpoints:
+			start=point[0];
+			end=point[1];
+			createRootMenu(options,start,end);
+			createTitlesets(options,start,end);
+			createTitles(options,start,end);
+			createBackgroundMenuImages(options,start,end);
+			checkForRequiredMpegs(options);
+			runDVDAuth(options);
 		
 def createWorkingFolder(options):
 	if  not os.path.exists(options.output):
@@ -106,51 +113,49 @@ def checkForRequiredMpegs(options):
 def getPlayListFromAPI(options):
 	httpServ = httplib.HTTPConnection("www.khanacademy.org", 80)
 	httpServ.connect()
-	httpServ.request('GET', "/api/v1/playlists/"+options.playlist+"/videos")
+	httpServ.request('GET', "/api/v1/playlists/library/list")
 
+	
+	
 	response = httpServ.getresponse()
 	if response.status == httplib.OK:
-		result = response.read();
+		if(options.sample=='y'):
+			result = readFile('./playlist'); # just read a local copy
+		else:
+			result = response.read();
 		playlistitems = json.loads(result);
 		filename = '';
 		count = 0;
 		names=[];
-		if(len(playlistitems)==0):
+		if(len(playlistitems)==0):# in case the API is down
 			raise IOError('API Playlist is empty');
-		for item in playlistitems:
-			playlistfile = item['download_urls']['mp4'];
-			name = item['readable_id'];
-			global readabletitles;
-			readabletitles.append(name);
-			global globtitles;
-			globtitles.append(item['title']);
-			filename = options.output + "/" + name + ".mp4"; 
-			names.append(name);
+		for topic in playlistitems:
+		   if (topic['title']==options.playlist):
+			for item in topic['videos']:
+				playlistfile = item['download_urls']['mp4'];
+				name = item['readable_id'];
+				
+				readabletitles.append(name);
+				globtitles.append(item['title']);
+				filename = options.output + "/" + name + ".mp4";
+				downloadLinks.append([playlistfile,filename]); 
+				names.append(name);
 			#TESTING
 			
-			count = count + 1;
-			if(count > 4 and options.sample=='y'):
-				return;
-			##if the file already exists and the clean option is not used don't bother re-downloading
-			if os.path.exists(filename):
-				#clean and re-download
-				if options.download == "y":
-					runProcess(["rm", filename]);
-					outputMessage("I removed existing MP4 file: " + filename)
-					downloadAndConvertFile(options, playlistfile, filename)
-				else:
-					outputMessage("MP4 file already exists will not bother to re-download it: " + filename)
-					##check file sizes match anyway before converting
-					checkFileDownloadedCorrectly(options,playlistfile,filename);
-					convertvideo(options, filename)
-					continue;
-			else: 
-				downloadAndConvertFile(options, playlistfile, filename)
+				count = count + 1;
+				if(count > 4 and options.sample=='y'):
+					return;
+			
+				
 	else:
 		raise IOError("Playlist API unavailable");
-				
-def checkFileDownloadedCorrectly(options, playlistfile, filename):	
 	
+	
+				
+def checkFileDownloadedCorrectly(options, playlistfile, filename,count):	
+	
+	if(count>=5):
+		raise IOError('Failed to download video '+ playlistfile + 'max retries exceeded.')
 	
 	#todo max retries
 	site = urllib.urlopen(playlistfile)
@@ -164,18 +169,49 @@ def checkFileDownloadedCorrectly(options, playlistfile, filename):
 	if(expected != actual):
 		if(options.redownload=='y'):
 			outputMessage ("Incomplete download detected will retry file :"+ filename +" from url " +playlistfile);
-			downloadAndConvertFile(options, playlistfile,filename);
+			downloadVideos(options, playlistfile,filename);
 		else:
 			raise IOError("Downloaded file: " +filename+"  does match expected size: " + str(expected))	
 	
 						# do nothing for existing files
 				
-def downloadAndConvertFile(options, playlistfile, filename):  
-	outputMessage("Retrieving file ..." + playlistfile);
-	urllib.urlretrieve(playlistfile, filename);
-	convertvideo(options, filename);
-	checkFileDownloadedCorrectly(options,playlistfile,filename);
+def downloadVideos(options):  
 	
+	for pairedInfo in downloadLinks:
+		if os.path.exists(pairedInfo[1]):
+				#clean and re-download
+				if options.download == "y":
+					runProcess(["rm", pairedInfo[1]]);
+					outputMessage("I removed existing MP4 file: " + pairedInfo[1])
+					#downloadAndConvertFile(options, playlistfile, pairedInfo)
+				else:
+					outputMessage("MP4 file already exists will not bother to re-download it: " + pairedInfo[1])
+					##check file sizes match anyway before converting
+					continue;
+		outputMessage ("Downloading file: "+pairedInfo[0])
+ 		urllib.urlretrieve(pairedInfo[0], pairedInfo[1]);
+		checkFileDownloadedCorrectly(options,pairedInfo[0],pairedInfo[1],0);
+
+def convertVideos(options):
+	outputMessage ("Converting Videos")
+	dvdindex=0;
+	dvdpoints=[];
+	dvdstart=0;
+	dvdend=0;
+	item=0;
+	for pairedInfo in downloadLinks:
+		convertvideo(options,pairedInfo[1]);
+		global totalDVDSize;
+		if(totalDVDSize>136314880):
+			dvdend=item;
+			dvdpoints.append([dvdstart,dvdend])
+			dvdstart=item+1;
+			totalDVDSize=0;
+		item=item+1;
+	dvdend=item;
+	dvdpoints.append([dvdstart,dvdend])
+	
+	return dvdpoints;
 			
 def outputMessage(message):
 	sys.stderr.write("-----------------------------------------------------------------------\n");
@@ -184,7 +220,6 @@ def outputMessage(message):
 	sys.stderr.write("-----------------------------------------------------------------------\n");		  
 
 def convertvideo(options, filename):
-	
 	mpegFile = filename.replace("mp4", "mpeg");
 	
 	if os.path.exists(mpegFile):
@@ -194,11 +229,45 @@ def convertvideo(options, filename):
 		else:
 			# do nothing for existing files
 			outputMessage("Mepg file already exists will not bother to re-make it: " + mpegFile)
+			updateTotalDVDSize(mpegFile);
 			return;
 	outputMessage("Converting " + filename)
 	call_args = ["ffmpeg", "-i", filename, "-target", "pal-dvd", mpegFile,"-ar","48000","-acodec","TrueHD"];
 	runProcess(call_args);
-	time.sleep(2)
+	time.sleep(2);
+	updateTotalDVDSize(mpegFile);
+	
+def updateTotalDVDSize(mpegFile):
+	global totalDVDSize;
+	totalDVDSize=totalDVDSize+ checkFileSize(mpegFile)
+	outputMessage("Approx Current DVD size "+ str(convert_bytes(totalDVDSize)))	
+	
+
+def checkFileSize(filename):	
+	##check the size and add it to the total DVD size
+	f = open(filename, "r")
+	actual=len(f.read())
+	outputMessage("File on disk: "+ str(actual))
+	f.close()
+	return actual;	
+	
+def convert_bytes(bytes):
+    bytes = float(bytes)
+    if bytes >= 1099511627776:
+        terabytes = bytes / 1099511627776
+        size = '%.2fT' % terabytes
+    elif bytes >= 1073741824:
+        gigabytes = bytes / 1073741824
+        size = '%.2fG' % gigabytes
+    elif bytes >= 1048576:
+        megabytes = bytes / 1048576
+        size = '%.2fM' % megabytes
+    elif bytes >= 1024:
+        kilobytes = bytes / 1024
+        size = '%.2fK' % kilobytes
+    else:
+        size = '%.2fb' % bytes
+    return size
 
 
 	
@@ -207,14 +276,14 @@ def convertvideo(options, filename):
 			
 	
 
-def createRootMenu(options):
+def createRootMenu(options,start,end):
 	#create the main menu
 	im = Image.open(options.background);
 	draw = ImageDraw.Draw(im)
 	position=14;
 	font=getFont();
 	menuplus=1;
-	for title in range(len(globtitles)):
+	for title in range(start,end):
 		if(title%14==0 and title!=0):
 			draw.text((60, position), "Videos Part "+ str(menuplus), font=font, fill=(255,255,255))
 			menuplus=menuplus+1;
@@ -226,11 +295,11 @@ def createRootMenu(options):
 	createMainMenu(options, backFile,"mainmenu")
 		 
 
-def createTitlesets(options):
+def createTitlesets(options,start,end):
 	
 	buttonText="";#the text for the template control file
 	titleplus=1;
-	for title in range(len(globtitles)):
+	for title in range(start,end):
 		if(title%14==0 and title!=0):
 			buttonText=buttonText+"<button>jump titleset "+str(titleplus)+" menu;</button>"+"\n";
 			titleplus=titleplus+1;
@@ -255,14 +324,14 @@ def readFile(mfile):
 	f.close();
 	return text;
 
-def createTitles(options):
+def createTitles(options,start,end):
 	titleText="";				  
 	titles="";
 	outputDVDXML=options.output+"/dvd.xml";
 	buttonText=""
 	buttonindex=1;
 	titleindex=1;
-	for title in range(len(globtitles)):
+	for title in range(start,end):
 		titleText=titleText+"<pgc><vob file=\""+readabletitles[title]+".mpeg\" pause=\"3\" /></pgc>\n";
 		buttonText=buttonText+"<button>jump title "+str(buttonindex)+";</button>"
 		buttonindex=buttonindex+1;
@@ -288,13 +357,13 @@ def getFont():
 		
 		
 	
-def createBackgroundMenuImages(options):
+def createBackgroundMenuImages(options,start,end):
 	im = Image.open(options.background);
 	position=14;
 	draw = ImageDraw.Draw(im)
 	menuindex=0;
 	font=getFont();
-	for title in range(len(globtitles)):
+	for title in range(start,end):
 		draw.text((60, position), globtitles[title], font=font, fill=(255,255,255))
 		position=position+40
 		if(title%14==0 and title!=0):##14 is the number of items per menu
@@ -324,7 +393,7 @@ def createBackgroundMenuImages(options):
 			
 def createMainMenu(options, backgroundFile,backName):
 	#Add text to the background
-	menufile = options.output + "/menu.xml";
+	menufile = options.common + "/menu.xml";
 	outputMessage("Creating background menu. with menu file: " +menufile+ " background JPEG: " +backgroundFile + " and output filename: " +backName)
 	outm2v = options.output + '/menu.m2v';
 	outputfile=options.output + '/'+backName+'.mpeg';
@@ -369,11 +438,6 @@ def runDVDAuth(options):
 	#go back
 	os.chdir(currentpath);
 	
-def downloadVideos(options):
-	call_args = [options.python, options.download, options.playlist];
-	outputMessage('DOWNLOADING...................................');
-	runProcess(call_args);
-   
 		
 	
 def runCommand(call_args):

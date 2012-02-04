@@ -67,6 +67,7 @@ def main():
 		getPlayListFromAPI(options);
 		downloadVideos(options);
 		dvdpoints=convertVideos(options)
+		dvdindex=1;
 		for point in dvdpoints:
 			start=point[0];
 			end=point[1];
@@ -75,7 +76,8 @@ def main():
 			createTitles(options,start,end);
 			createBackgroundMenuImages(options,start,end);
 			checkForRequiredMpegs(options);
-			runDVDAuth(options);
+			runDVDAuth(options,dvdindex);
+			dvdindex=dvdindex+1;
 		
 def createWorkingFolder(options):
 	if  not os.path.exists(options.output):
@@ -197,8 +199,8 @@ def convertVideos(options):
 	dvdindex=0;
 	dvdpoints=[];
 	dvdstart=0;
-	dvdend=0;
-	item=0;
+	dvdend=1;
+	item=1;
 	for pairedInfo in downloadLinks:
 		convertvideo(options,pairedInfo[1]);
 		global totalDVDSize;
@@ -208,8 +210,8 @@ def convertVideos(options):
 			dvdstart=item+1;
 			totalDVDSize=0;
 		item=item+1;
-	dvdend=item;
-	dvdpoints.append([dvdstart,dvdend])
+	
+	
 	
 	return dvdpoints;
 			
@@ -330,7 +332,7 @@ def createTitles(options,start,end):
 	outputDVDXML=options.output+"/dvd.xml";
 	buttonText=""
 	buttonindex=1;
-	titleindex=1;
+	titleindex=0;
 	for title in range(start,end):
 		titleText=titleText+"<pgc><vob file=\""+readabletitles[title]+".mpeg\" pause=\"3\" /></pgc>\n";
 		buttonText=buttonText+"<button>jump title "+str(buttonindex)+";</button>"
@@ -345,6 +347,10 @@ def createTitles(options,start,end):
 			buttonindex=1;
 			titleindex=titleindex+1
 	
+	text=readFile(options.common+"/template-titles.xml")
+	first=  text.replace('@a',buttonText);
+	second= first.replace('@x',str(titleindex))
+	titles=titles+ second.replace('@b',titleText);
 	text=readFile(outputDVDXML)
 	text = text.replace('@b',titles);
 	writeToFile(outputDVDXML, text)
@@ -422,7 +428,7 @@ def createMainMenu(options, backgroundFile,backName):
 	output = p5.communicate()[0]
 	outputMessage(output);
    
-def runDVDAuth(options):
+def runDVDAuth(options,index):
 	outputMessage("Running dvdauthor...");
 	
 	## go into the output directory
@@ -431,10 +437,10 @@ def runDVDAuth(options):
 	dvdauthfile = "dvd.xml"
 	if not os.path.exists(dvdauthfile):
 		raise IOError("DVD auth file " + dvdauthfile + " not found.");
-	outputMessage("Now in directory"+options.output);
+	outputMessage("Now in directory: "+options.output);
 	#-O instead of -o used to delete any previous output
 
-	runProcess(["dvdauthor", "-O", "OUT", "-x", dvdauthfile ]);
+	runProcess(["dvdauthor", "-O", "OUT"+str(index), "-x", dvdauthfile ]);
 	#go back
 	os.chdir(currentpath);
 	

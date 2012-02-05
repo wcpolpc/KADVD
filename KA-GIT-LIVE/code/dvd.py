@@ -214,7 +214,8 @@ def convertVideos(options):
 		item=item+1;
 	
 	
-	
+	dvdend=item-1;
+	dvdpoints.append([dvdstart,dvdend])
 	return dvdpoints;
 			
 def outputMessage(message):
@@ -287,11 +288,13 @@ def createRootMenu(options,start,end):
 	position=14;
 	font=getFont();
 	menuplus=1;
+	titleindex=0;
 	for title in range(start,end):
-		if(title%14==0 and title!=0):
+		if(titleindex%14==0 and titleindex!=0):
 			draw.text((60, position), "Videos Part "+ str(menuplus), font=font, fill=(255,255,255))
 			menuplus=menuplus+1;
 			position=position+40
+		titleindex=titleindex+1;
 	#draw the final text
 	draw.text((60, position), "Videos Part "+ str(menuplus), font=font, fill=(255,255,255))
 	backFile=options.output +"/mainmenu.jpg";
@@ -304,10 +307,12 @@ def createTitlesets(options,start,end,dvdindex):
 	
 	buttonText="";#the text for the template control file
 	titleplus=1;
+	titleindex=0;
 	for title in range(start,end):
-		if(title%14==0 and title!=0):
+		if(titleindex%14==0 and titleindex!=0):
 			buttonText=buttonText+"<button>jump titleset "+str(titleplus)+" menu;</button>"+"\n";
 			titleplus=titleplus+1;
+		titleindex=titleindex+1;
 			
 	#write the final one
 	buttonText=buttonText+"<button>jump titleset "+str(titleplus)+" menu;</button>"+"\n";
@@ -382,8 +387,8 @@ def createBackgroundMenuImages(options,start,end,dvdindex):
 	font=getFont();
 	buttoncount=0;
 	for title in range(start,end):
-		draw.text((60, position), globtitles[title], font=font, fill=(255,255,255))
-		position=position+40
+		
+		
 		
 		if(buttoncount%13==0 and buttoncount!=0):##13 is the number of video items per menu
 			#draw the return to  main menu button text
@@ -398,6 +403,9 @@ def createBackgroundMenuImages(options,start,end,dvdindex):
 			draw = ImageDraw.Draw(im)
 			createMainMenu(options, backFile, backName,(buttoncount+1)); #plus one is for the return to main menu button
 			buttoncount=0;
+		
+		draw.text((60, position), globtitles[title], font=font, fill=(255,255,255))
+		position=position+40
 		buttoncount=buttoncount+1;
 			
 	#draw the return to  main menu button text
@@ -425,7 +433,7 @@ def createMainMenu(options, backgroundFile,backName,numButtons):
 	menuindex=numButtons;
 	#Add text to the background
 	menufile = options.common + "/menu"+str(menuindex)+".xml"; # use the menu with the appropriate number of buttons
-	outputMessage("Creating background menu  with menu file: "
+	outputMessage("Creating background position=position+40menu  with menu file: "
 				 +menufile+ " \n background JPEG: "
 				  +backgroundFile 
 				  + " \n and output filename: " 

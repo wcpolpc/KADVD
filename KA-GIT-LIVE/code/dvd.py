@@ -72,10 +72,10 @@ def main():
 			start=point[0];
 			end=point[1];
 			createRootMenu(options,start,end);
-			createTitlesets(options,start,end);
-			createTitles(options,start,end);
+			createTitlesets(options,start,end,dvdindex);
+			createTitles(options,start,end,dvdindex);
 			createBackgroundMenuImages(options,start,end);
-			checkForRequiredMpegs(options);
+			checkForRequiredMpegs(options,dvdindex);
 			runDVDAuth(options,dvdindex);
 			dvdindex=dvdindex+1;
 		
@@ -89,8 +89,8 @@ def createWorkingFolder(options):
 		shutil.rmtree(options.output, ignore_errors=True);
 		os.makedirs(options.output)
 
-def checkForRequiredMpegs(options):
-	f = open(options.output+"/dvd.xml", "r")
+def checkForRequiredMpegs(options,index):
+	f = open(options.output+"/dvd"+str(index)+".xml", "r")
 	text = f.read()
 	text = text.rstrip();
 	text = text.replace('\n', '')
@@ -145,7 +145,7 @@ def getPlayListFromAPI(options):
 			#TESTING
 			
 				count = count + 1;
-				if(count > 4 and options.sample=='y'):
+				if(count > 14 and options.sample=='y'):
 					return;
 			
 				
@@ -204,7 +204,7 @@ def convertVideos(options):
 	for pairedInfo in downloadLinks:
 		convertvideo(options,pairedInfo[1]);
 		global totalDVDSize;
-		if(totalDVDSize>136314880):
+		if(totalDVDSize>1136314880):
 			dvdend=item;
 			dvdpoints.append([dvdstart,dvdend])
 			dvdstart=item+1;
@@ -297,7 +297,7 @@ def createRootMenu(options,start,end):
 	createMainMenu(options, backFile,"mainmenu")
 		 
 
-def createTitlesets(options,start,end):
+def createTitlesets(options,start,end,dvdindex):
 	
 	buttonText="";#the text for the template control file
 	titleplus=1;
@@ -310,7 +310,7 @@ def createTitlesets(options,start,end):
 	buttonText=buttonText+"<button>jump titleset "+str(titleplus)+" menu;</button>"+"\n";
 	text = readFile(options.common+"/template.xml")
 	text = text.replace('@a',buttonText);
-	outputDVDXML=options.output + '/dvd.xml';
+	outputDVDXML=options.output + '/dvd'+str(dvdindex)+'.xml';
 	writeToFile(outputDVDXML, text)
 	
 	
@@ -326,26 +326,31 @@ def readFile(mfile):
 	f.close();
 	return text;
 
-def createTitles(options,start,end):
+def createTitles(options,start,end,dvdindex):
 	titleText="";				  
 	titles="";
-	outputDVDXML=options.output+"/dvd.xml";
+	outputDVDXML=options.output+'/dvd'+str(dvdindex)+'.xml';
 	buttonText=""
 	buttonindex=1;
 	titleindex=0;
 	for title in range(start,end):
-		titleText=titleText+"<pgc><vob file=\""+readabletitles[title]+".mpeg\" pause=\"3\" /></pgc>\n";
-		buttonText=buttonText+"<button>jump title "+str(buttonindex)+";</button>"
-		buttonindex=buttonindex+1;
-		if(title%14==0 and title!=0):
+		if(title==end-1):
+			buttonText=buttonText+"<button>jump vmgm menu 1;</button>"
+		
+		elif(buttonindex%14==0 and buttonindex!=0):
 			text=readFile(options.common+"/template-titles.xml")
 			first=  text.replace('@a',buttonText);
 			second= first.replace('@x',str(titleindex))
 			titles=titles+ second.replace('@b',titleText);
-			titleText=""
-			buttonText=""
+			titleText="";
+			buttonText="";
 			buttonindex=1;
-			titleindex=titleindex+1
+			titleindex=titleindex+1;
+		else:
+			titleText=titleText+"<vob file=\""+readabletitles[title]+".mpeg\" pause=\"3\" />\n";
+			buttonText=buttonText+"<button>jump title 1 chapter "+str(buttonindex)+";</button>"
+			
+		buttonindex=buttonindex+1;
 	
 	text=readFile(options.common+"/template-titles.xml")
 	first=  text.replace('@a',buttonText);
@@ -434,7 +439,7 @@ def runDVDAuth(options,index):
 	## go into the output directory
 	currentpath = os.getcwd()
 	os.chdir(options.output)
-	dvdauthfile = "dvd.xml"
+	dvdauthfile = "dvd"+str(index)+".xml"
 	if not os.path.exists(dvdauthfile):
 		raise IOError("DVD auth file " + dvdauthfile + " not found.");
 	outputMessage("Now in directory: "+options.output);

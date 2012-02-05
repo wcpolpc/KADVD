@@ -74,7 +74,7 @@ def main():
 			createRootMenu(options,start,end);
 			createTitlesets(options,start,end,dvdindex);
 			createTitles(options,start,end,dvdindex);
-			createBackgroundMenuImages(options,start,end);
+			createBackgroundMenuImages(options,start,end,dvdindex);
 			checkForRequiredMpegs(options,dvdindex);
 			runDVDAuth(options,dvdindex);
 			dvdindex=dvdindex+1;
@@ -293,8 +293,9 @@ def createRootMenu(options,start,end):
 	#draw the final text
 	draw.text((60, position), "Part "+ str(menuplus), font=font, fill=(255,255,255))
 	backFile=options.output +"/mainmenu.jpg";
-	im.save(backFile , "JPEG",quality=95)   ;
-	createMainMenu(options, backFile,"mainmenu")
+	im.save(backFile , "JPEG",quality=95);
+	
+	createMainMenu(options, backFile,"mainmenu",menuplus); 
 		 
 
 def createTitlesets(options,start,end,dvdindex):
@@ -334,14 +335,14 @@ def createTitles(options,start,end,dvdindex):
 	buttonindex=1;
 	titleindex=0;
 	for title in range(start,end):
-		if(title==end-1):
-			buttonText=buttonText+"<button>jump vmgm menu 1;</button>"
+			
 		
-		elif(buttonindex%14==0 and buttonindex!=0):
+		if(buttonindex%14==0 and buttonindex!=0):
 			text=readFile(options.common+"/template-titles.xml")
 			first=  text.replace('@a',buttonText);
 			second= first.replace('@x',str(titleindex))
-			titles=titles+ second.replace('@b',titleText);
+			third= second.replace('@y',str(dvdindex))
+			titles=titles+ third.replace('@b',titleText);
 			titleText="";
 			buttonText="";
 			buttonindex=1;
@@ -351,11 +352,12 @@ def createTitles(options,start,end,dvdindex):
 			buttonText=buttonText+"<button>jump title 1 chapter "+str(buttonindex)+";</button>"
 			
 		buttonindex=buttonindex+1;
-	
+	buttonText=buttonText+"<button>jump vmgm menu 1;</button>"
 	text=readFile(options.common+"/template-titles.xml")
 	first=  text.replace('@a',buttonText);
 	second= first.replace('@x',str(titleindex))
-	titles=titles+ second.replace('@b',titleText);
+	third= second.replace('@y',str(dvdindex))
+	titles=titles+ third.replace('@b',titleText);
 	text=readFile(outputDVDXML)
 	text = text.replace('@b',titles);
 	writeToFile(outputDVDXML, text)
@@ -368,7 +370,7 @@ def getFont():
 		
 		
 	
-def createBackgroundMenuImages(options,start,end):
+def createBackgroundMenuImages(options,start,end,dvdindex):
 	im = Image.open(options.background);
 	position=14;
 	draw = ImageDraw.Draw(im)
@@ -378,7 +380,9 @@ def createBackgroundMenuImages(options,start,end):
 		draw.text((60, position), globtitles[title], font=font, fill=(255,255,255))
 		position=position+40
 		if(title%14==0 and title!=0):##14 is the number of items per menu
-			backName="background"+str(menuindex); #eg bacground1	
+			#draw the return to  main menu button text
+			draw.text((60, position), "Return to main menu", font=font, fill=(255,255,255))
+			backName="background-image-"+str(menuindex)+"-dvd-"+str(dvdindex); #eg bacground1	
 			backFile=options.output +"/"+backName+".jpg";
 			im.save(backFile , "JPEG",quality=95)   ;
 			im = Image.open(options.background);
@@ -386,13 +390,18 @@ def createBackgroundMenuImages(options,start,end):
 			menuindex=menuindex+1;
 			del draw;
 			draw = ImageDraw.Draw(im)
-			createMainMenu(options,backFile,backName);
+			createMainMenu(options, backFile, backName,(end-start)+1);
+			
+	#draw the return to  main menu button text
+	draw.text((60, position), "Return to main menu", font=font, fill=(255,255,255))
 	#write the final menu
-	backName="background"+str(menuindex); #eg bacground1	
+	backName="background-image-"+str(menuindex)+"-dvd-"+str(dvdindex); #eg bacground1	
 	backFile=options.output +"/"+backName+".jpg";
 	im.save(backFile , "JPEG",quality=95)   ;
 	del draw;
-	createMainMenu(options, backFile, backName);
+	
+	
+	createMainMenu(options, backFile, backName,(end-start)+1);
 	
 
 		 
@@ -402,10 +411,21 @@ def createBackgroundMenuImages(options,start,end):
 	
 
 			
-def createMainMenu(options, backgroundFile,backName):
+def createMainMenu(options, backgroundFile,backName,numButtons):
+	if(numButtons>13 ):
+		raise IOError("There are too many buttons for the menu");
+	menuindex=numButtons;
 	#Add text to the background
-	menufile = options.common + "/menu.xml";
-	outputMessage("Creating background menu. with menu file: " +menufile+ " background JPEG: " +backgroundFile + " and output filename: " +backName)
+	menufile = options.common + "/menu"+str(menuindex)+".xml"; # use the menu with the appropriate number of buttons
+	outputMessage("Creating background menu. with menu file: "
+				 +menufile+ " \n background JPEG: "
+				  +backgroundFile 
+				  + " \n and output filename: " 
+				  +backName +" \n you are in dir: "+ os.getcwd())
+	#if os.path.exists(menufile) :
+		#raise IOError("Menufile "+menufile+" does not exist!")
+	
+	
 	outm2v = options.output + '/menu.m2v';
 	outputfile=options.output + '/'+backName+'.mpeg';
 	#TODO add clean flag

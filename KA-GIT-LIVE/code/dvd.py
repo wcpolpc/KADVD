@@ -39,14 +39,14 @@ def main():
 	parser.add_option("-e", "--python", default=(sys.executable if platform.system() == "Windows" else "python"), help="Path of python executable.")
 	parser.add_option("-s", "--skip", default='y', help="Whether to skip downloading files")
 	parser.add_option("-v", "--videos", default='../videos', help="Location of the videos directory")
-	parser.add_option("-b", "--background", default='../dvd_menus/menu_template.jpg', help="Location of the Background image for the main menu")
+	parser.add_option("-b", "--background", default='../common_files/menu_template.jpg', help="Location of the Background image for the main menu")
 	parser.add_option("-o", "--output", default='', help="Location of the output for the DVD")
 	parser.add_option("-c", "--clean", default='n', help="Cleans the output")
 	parser.add_option("-m", "--remake", default='n', help="Reconverts mp4 videos to mpeg")
 	parser.add_option("-d","--download", default='n', help="Cleans the output")
 	parser.add_option("-t", "--common", default='', help="directory for common template xml and background image files")
 	parser.add_option("-x", "--sample", default='', help="Perform a sample run")
-	parser.add_option("-r", "--recreate", default='n', help="Recreate menu mpegs")
+	#parser.add_option("-r", "--recreate", default='n', help="Recreate menu mpegs")
 	parser.add_option("-f", "--redownload", default='y', help="Automatically re-download failed downloads")
 	
 	
@@ -113,6 +113,8 @@ def checkForRequiredMpegs(options,index):
 			raise IOError("Cannot continue! Some files have not been converted properly or cannot be found:" + fileneeded)
 
 def getPlayListFromAPI(options):
+	
+	outputMessage("Reading Playlist from API")
 	httpServ = httplib.HTTPConnection("www.khanacademy.org", 80)
 	httpServ.connect()
 	httpServ.request('GET', "/api/v1/playlists/library/list")
@@ -204,7 +206,7 @@ def convertVideos(options):
 	for pairedInfo in downloadLinks:
 		convertvideo(options,pairedInfo[1]);
 		global totalDVDSize;
-		if(totalDVDSize>1136314880):
+		if(totalDVDSize>4500000000):#1136314880):
 			dvdend=item;
 			dvdpoints.append([dvdstart,dvdend])
 			dvdstart=item+1;
@@ -230,7 +232,7 @@ def convertvideo(options, filename):
 			outputMessage("I removed existing MPEG file: " + mpegFile)
 		else:
 			# do nothing for existing files
-			outputMessage("Mepg file already exists will not bother to re-make it: " + mpegFile)
+			outputMessage("Mpeg file already exists will not bother to re-make it: " + mpegFile)
 			updateTotalDVDSize(mpegFile);
 			return;
 	outputMessage("Converting " + filename)
@@ -254,22 +256,22 @@ def checkFileSize(filename):
 	return actual;	
 	
 def convert_bytes(bytes):
-    bytes = float(bytes)
-    if bytes >= 1099511627776:
-        terabytes = bytes / 1099511627776
-        size = '%.2fT' % terabytes
-    elif bytes >= 1073741824:
-        gigabytes = bytes / 1073741824
-        size = '%.2fG' % gigabytes
-    elif bytes >= 1048576:
-        megabytes = bytes / 1048576
-        size = '%.2fM' % megabytes
-    elif bytes >= 1024:
-        kilobytes = bytes / 1024
-        size = '%.2fK' % kilobytes
-    else:
-        size = '%.2fb' % bytes
-    return size
+	bytes = float(bytes)
+	if bytes >= 1099511627776:
+		terabytes = bytes / 1099511627776
+		size = '%.2fT' % terabytes
+	elif bytes >= 1073741824:
+		gigabytes = bytes / 1073741824
+		size = '%.2fG' % gigabytes
+	elif bytes >= 1048576:
+		megabytes = bytes / 1048576
+		size = '%.2fM' % megabytes
+	elif bytes >= 1024:
+		kilobytes = bytes / 1024
+		size = '%.2fK' % kilobytes
+	else:
+		size = '%.2fb' % bytes
+	return size
 
 
 	
@@ -291,7 +293,7 @@ def createRootMenu(options,start,end):
 			menuplus=menuplus+1;
 			position=position+40
 	#draw the final text
-	draw.text((60, position), "Part "+ str(menuplus), font=font, fill=(255,255,255))
+	draw.text((60, position), "Videos Part "+ str(menuplus), font=font, fill=(255,255,255))
 	backFile=options.output +"/mainmenu.jpg";
 	im.save(backFile , "JPEG",quality=95);
 	
@@ -332,35 +334,37 @@ def createTitles(options,start,end,dvdindex):
 	titles="";
 	outputDVDXML=options.output+'/dvd'+str(dvdindex)+'.xml';
 	buttonText=""
-	buttonindex=1;
+	buttonindex=1; # keep track of how many buttons are in this title
 	titleindex=0;
 	for title in range(start,end):
 			
 		
 		if(buttonindex%14==0 and buttonindex!=0):
-			text=readFile(options.common+"/template-titles.xml")
-			first=  text.replace('@a',buttonText);
-			second= first.replace('@x',str(titleindex))
-			third= second.replace('@y',str(dvdindex))
-			titles=titles+ third.replace('@b',titleText);
+			titles=flushTitleToTemplate(options, buttonText, titles, titleindex,titleText, dvdindex)
 			titleText="";
 			buttonText="";
 			buttonindex=1;
 			titleindex=titleindex+1;
-		else:
-			titleText=titleText+"<vob file=\""+readabletitles[title]+".mpeg\" pause=\"3\" />\n";
-			buttonText=buttonText+"<button>jump title 1 chapter "+str(buttonindex)+";</button>"
-			
+		titleText=titleText+"<vob file=\""+readabletitles[title]+".mpeg\" pause=\"3\" />\n";
+		buttonText=buttonText+"<button>jump title 1 chapter "+str(buttonindex)+";</button>"
 		buttonindex=buttonindex+1;
+	#write the final title
+	titles=flushTitleToTemplate(options, buttonText,titles, titleindex,titleText, dvdindex)
+	text=readFile(outputDVDXML)
+	text = text.replace('@b',titles);
+	writeToFile(outputDVDXML, text)
+	
+
+def flushTitleToTemplate(options,buttonText, titles,titleindex,titleText,dvdindex):
 	buttonText=buttonText+"<button>jump vmgm menu 1;</button>"
 	text=readFile(options.common+"/template-titles.xml")
 	first=  text.replace('@a',buttonText);
 	second= first.replace('@x',str(titleindex))
 	third= second.replace('@y',str(dvdindex))
 	titles=titles+ third.replace('@b',titleText);
-	text=readFile(outputDVDXML)
-	text = text.replace('@b',titles);
-	writeToFile(outputDVDXML, text)
+	return titles;
+	
+	
 	
 def getFont():
 	#TODO package font 
@@ -376,24 +380,28 @@ def createBackgroundMenuImages(options,start,end,dvdindex):
 	draw = ImageDraw.Draw(im)
 	menuindex=0;
 	font=getFont();
+	buttoncount=0;
 	for title in range(start,end):
 		draw.text((60, position), globtitles[title], font=font, fill=(255,255,255))
 		position=position+40
-		if(title%14==0 and title!=0):##14 is the number of items per menu
+		
+		if(buttoncount%13==0 and buttoncount!=0):##13 is the number of video items per menu
 			#draw the return to  main menu button text
-			draw.text((60, position), "Return to main menu", font=font, fill=(255,255,255))
+			draw.text((60, position), " << Return to main menu", font=font, fill=(255,255,255))
 			backName="background-image-"+str(menuindex)+"-dvd-"+str(dvdindex); #eg bacground1	
 			backFile=options.output +"/"+backName+".jpg";
 			im.save(backFile , "JPEG",quality=95)   ;
 			im = Image.open(options.background);
-			position=0;
+			position=14;
 			menuindex=menuindex+1;
 			del draw;
 			draw = ImageDraw.Draw(im)
-			createMainMenu(options, backFile, backName,(end-start)+1);
+			createMainMenu(options, backFile, backName,(buttoncount+1)); #plus one is for the return to main menu button
+			buttoncount=0;
+		buttoncount=buttoncount+1;
 			
 	#draw the return to  main menu button text
-	draw.text((60, position), "Return to main menu", font=font, fill=(255,255,255))
+	draw.text((60, position), " << Return to main menu", font=font, fill=(255,255,255))
 	#write the final menu
 	backName="background-image-"+str(menuindex)+"-dvd-"+str(dvdindex); #eg bacground1	
 	backFile=options.output +"/"+backName+".jpg";
@@ -401,7 +409,7 @@ def createBackgroundMenuImages(options,start,end,dvdindex):
 	del draw;
 	
 	
-	createMainMenu(options, backFile, backName,(end-start)+1);
+	createMainMenu(options, backFile, backName,(buttoncount)+1);#plus one for the return to main menu button
 	
 
 		 
@@ -412,16 +420,18 @@ def createBackgroundMenuImages(options,start,end,dvdindex):
 
 			
 def createMainMenu(options, backgroundFile,backName,numButtons):
-	if(numButtons>13 ):
-		raise IOError("There are too many buttons for the menu");
+	if(numButtons>14 ):
+		raise IOError("There are too many buttons (>14) for the menu:"+str(numButtons));
 	menuindex=numButtons;
 	#Add text to the background
 	menufile = options.common + "/menu"+str(menuindex)+".xml"; # use the menu with the appropriate number of buttons
-	outputMessage("Creating background menu. with menu file: "
+	outputMessage("Creating background menu  with menu file: "
 				 +menufile+ " \n background JPEG: "
 				  +backgroundFile 
 				  + " \n and output filename: " 
-				  +backName +" \n you are in dir: "+ os.getcwd())
+				  +backName +" \n you are in dir: "+ os.getcwd()
+				  + " with number of buttons: " +str(numButtons))
+	soundtracks=["../common_files/Galdson-Roots.mp2", "../common_files/David-Alexandra.mp2"]; 
 	#if os.path.exists(menufile) :
 		#raise IOError("Menufile "+menufile+" does not exist!")
 	
@@ -429,9 +439,9 @@ def createMainMenu(options, backgroundFile,backName,numButtons):
 	outm2v = options.output + '/menu.m2v';
 	outputfile=options.output + '/'+backName+'.mpeg';
 	#TODO add clean flag
-	if os.path.exists(outputfile) and options.recreate == 'n':
-		outputMessage("Menu MPEG "+outputfile+" already exists, will not recreate unless clean option specified")
-		return;
+	#if os.path.exists(outputfile) and options.recreate == 'n':
+#		outputMessage("Menu MPEG "+outputfile+" already exists, will not recreate unless clean option specified")
+#		return;
 	#no interlacing -I 0
 	# call_args = ['jpegtopnm',options.output+'/back.jpg','|','ppmtoy4m','-n','1','-F','25:1','-I','t','-A','59:54','-L','-S','420mpeg2',
 	#			 '|','mpeg2enc','-I','0','-f','8','-n','p','-o',outm2v,'|','mplex','-f','8','-o','/dev/stdout',outm2v,'../dvd_menus/silent.mp2','|','spumux','-v','2',menufile,'>',options.output+'menu.mpg'];
@@ -443,7 +453,7 @@ def createMainMenu(options, backgroundFile,backName,numButtons):
 	time.sleep(1)
 	p3 = Popen(['mpeg2enc', '-I', '0', '-f', '8', '-n', 'p', '-o', outm2v], stdin=p2.stdout, stdout=PIPE)
 	time.sleep(1)
-	p4 = Popen(['mplex', '-f', '8', '-o', '/dev/stdout', outm2v, '../dvd_menus/silent.mp2'], stdin=p3.stdout, stdout=PIPE)
+	p4 = Popen(['mplex', '-f', '8', '-o', '/dev/stdout', outm2v, '../common_files/Galdson-Roots.mp2'], stdin=p3.stdout, stdout=PIPE)
 	time.sleep(1)
 	FILE = open(outputfile, "w")
 	time.sleep(1)

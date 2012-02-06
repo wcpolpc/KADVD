@@ -24,6 +24,7 @@ import simplejson as json
 import urllib
 import re
 import math
+from random import choice
 
 readabletitles=[];
 globtitles=[];
@@ -207,12 +208,11 @@ def convertVideos(options):
 		convertvideo(options,pairedInfo[1]);
 		global totalDVDSize;
 		if(totalDVDSize>4500000000):#1136314880):
-			dvdend=item;
+			dvdend=item+1; # because the for loop is not inclusive of the last element so +1
 			dvdpoints.append([dvdstart,dvdend])
 			dvdstart=item+1;
 			totalDVDSize=0;
 		item=item+1;
-	
 	
 	dvdend=item-1;
 	dvdpoints.append([dvdstart,dvdend])
@@ -250,11 +250,12 @@ def updateTotalDVDSize(mpegFile):
 
 def checkFileSize(filename):	
 	##check the size and add it to the total DVD size
-	f = open(filename, "r")
-	actual=len(f.read())
-	outputMessage("File on disk: "+ str(actual))
-	f.close()
-	return actual;	
+	return os.path.getsize(filename)
+	#f = open(filename, "r")
+	#actual=len(f.read())
+	#outputMessage("File on disk: "+ str(actual))
+	#f.close()
+	#return actual;	
 	
 def convert_bytes(bytes):
 	bytes = float(bytes)
@@ -300,7 +301,7 @@ def createRootMenu(options,start,end):
 	backFile=options.output +"/mainmenu.jpg";
 	im.save(backFile , "JPEG",quality=95);
 	
-	createMainMenu(options, backFile,"mainmenu",menuplus); 
+	createMainMenu(options, backFile,"mainmenu",menuplus,1); 
 		 
 
 def createTitlesets(options,start,end,dvdindex):
@@ -341,7 +342,7 @@ def createTitles(options,start,end,dvdindex):
 	buttonText=""
 	buttonindex=1; # keep track of how many buttons are in this title
 	titleindex=0;
-	for title in range(start,end):
+	for title in range(start,end): 
 			
 		
 		if(buttonindex%14==0 and buttonindex!=0):
@@ -401,7 +402,7 @@ def createBackgroundMenuImages(options,start,end,dvdindex):
 			menuindex=menuindex+1;
 			del draw;
 			draw = ImageDraw.Draw(im)
-			createMainMenu(options, backFile, backName,(buttoncount+1)); #plus one is for the return to main menu button
+			createMainMenu(options, backFile, backName,(buttoncount+1),-1); #plus one is for the return to main menu button
 			buttoncount=0;
 		
 		draw.text((60, position), globtitles[title], font=font, fill=(255,255,255))
@@ -417,7 +418,7 @@ def createBackgroundMenuImages(options,start,end,dvdindex):
 	del draw;
 	
 	
-	createMainMenu(options, backFile, backName,(buttoncount)+1);#plus one for the return to main menu button
+	createMainMenu(options, backFile, backName,(buttoncount)+1,-1);#plus one for the return to main menu button
 	
 
 		 
@@ -427,7 +428,7 @@ def createBackgroundMenuImages(options,start,end,dvdindex):
 	
 
 			
-def createMainMenu(options, backgroundFile,backName,numButtons):
+def createMainMenu(options, backgroundFile,backName,numButtons,soundTrack):
 	if(numButtons>14 ):
 		raise IOError("There are too many buttons (>14) for the menu:"+str(numButtons));
 	menuindex=numButtons;
@@ -439,7 +440,15 @@ def createMainMenu(options, backgroundFile,backName,numButtons):
 				  + " \n and output filename: " 
 				  +backName +" \n you are in dir: "+ os.getcwd()
 				  + " with number of buttons: " +str(numButtons))
-	soundtracks=["../common_files/Galdson-Roots.mp2", "../common_files/David-Alexandra.mp2"]; 
+	soundtracks=["../common_files/David-Alexandra.mp2", "../common_files/Diana-Hot.mp2"]; 
+	chosenTrack=""
+	if(soundTrack==1):
+		chosenTrack="../common_files/Galdson-Roots.mp2";
+	else:
+		chosenTrack=choice(soundtracks)
+	
+	
+		
 	#if os.path.exists(menufile) :
 		#raise IOError("Menufile "+menufile+" does not exist!")
 	
@@ -461,7 +470,7 @@ def createMainMenu(options, backgroundFile,backName,numButtons):
 	time.sleep(1)
 	p3 = Popen(['mpeg2enc', '-I', '0', '-f', '8', '-n', 'p', '-o', outm2v], stdin=p2.stdout, stdout=PIPE)
 	time.sleep(1)
-	p4 = Popen(['mplex', '-f', '8', '-o', '/dev/stdout', outm2v, '../common_files/Galdson-Roots.mp2'], stdin=p3.stdout, stdout=PIPE)
+	p4 = Popen(['mplex', '-f', '8', '-o', '/dev/stdout', outm2v, chosenTrack], stdin=p3.stdout, stdout=PIPE)
 	time.sleep(1)
 	FILE = open(outputfile, "w")
 	time.sleep(1)

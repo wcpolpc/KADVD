@@ -1,0 +1,14 @@
+<titleset>
+	<menus>
+		<pgc>
+			<vob file="background-image-@x-dvd-@y.mpeg" pause="inf" />
+			@a
+		</pgc>
+	</menus>
+	<titles>
+		<pgc >
+		@b	
+		<post> call menu; </post>
+		</pgc>
+	</titles>
+</titleset>

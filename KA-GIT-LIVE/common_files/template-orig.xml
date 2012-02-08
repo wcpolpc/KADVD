@@ -1,0 +1,119 @@
+<dvdauthor>
+	<vmgm>
+		<menus>
+			<video format="pal" aspect="4:3"/>
+			<pgc entry="title">
+				<vob file="mainmenu.mpeg" pause="inf" />
+				@a
+			</pgc>
+		</menus>
+	</vmgm>
+	<titleset>
+		<menus>
+			<pgc entry="root">
+				<vob file="background3.mpeg" pause="inf" />
+				<button>jump title 1;</button>
+				<button>jump title 2;</button>
+				<button>jump title 3;</button>
+				<button>jump title 4;</button>
+				<button>jump title 2;</button>
+				<button>jump title 1;</button>
+				<button>jump title 2;</button>
+				<button>jump title 3;</button>
+				<button>jump title 4;</button>
+				<button>jump title 2;</button>
+				<button>jump title 1;</button>
+				<button>jump title 2;</button>
+				<button>jump title 3;</button>
+				<button>jump title 4;</button>
+			</pgc>
+		</menus>
+		<titles>
+			<pgc>
+				<vob file="simple-equations.mpeg" pause="3" />
+			</pgc>
+			<pgc>
+				<vob file="equations-2.mpeg" pause="3" />
+			</pgc>
+			<pgc>
+				<vob file="equations-3.mpeg" pause="3" />
+			</pgc>
+			<pgc>
+				<vob file="algebra--linear-equations-4.mpeg" pause="3" />
+				<post> call menu; </post>
+			</pgc>
+		</titles>
+	</titleset>
+	<titleset>
+		<menus>
+			<pgc entry="root">
+				<vob file="background2.mpeg" pause="inf" />
+				<button>jump title 1;</button>
+				<button>jump title 2;</button>
+				<button>jump title 3;</button>
+				<button>jump title 4;</button>
+				<button>jump title 2;</button>
+				<button>jump title 1;</button>
+				<button>jump title 2;</button>
+				<button>jump title 3;</button>
+				<button>jump title 4;</button>
+				<button>jump title 2;</button>
+				<button>jump title 1;</button>
+				<button>jump title 2;</button>
+				<button>jump title 3;</button>
+				<button>jump title 4;</button>
+			</pgc>
+		</menus>
+		<titles>
+			<pgc>
+				<vob file="simple-equations.mpeg" pause="3" />
+			</pgc>
+			<pgc>
+				<vob file="equations-2.mpeg" pause="3" />
+			</pgc>
+			<pgc>
+				<vob file="equations-3.mpeg" pause="3" />
+			</pgc>
+			<pgc>
+				<vob file="algebra--linear-equations-4.mpeg" pause="3" />
+				<post> call menu; </post>
+			</pgc>
+		</titles>
+	</titleset>
+	<titleset>
+		<menus>
+			<pgc>
+				<vob file="background3.mpeg" pause="inf" />
+				<button>jump title 1;</button>
+				<button>jump title 2;</button>
+				<button>jump title 3;</button>
+				<button>jump title 4;</button>
+				<button>jump title 2;</button>
+				<button>jump title 1;</button>
+				<button>jump title 2;</button>
+				<button>jump title 3;</button>
+				<button>jump title 4;</button>
+				<button>jump title 2;</button>
+				<button>jump title 1;</button>
+				<button>jump title 2;</button>
+				<button>jump title 3;</button>
+				<button>jump title 4;</button>
+			</pgc>
+		</menus>
+		<titles>
+			<pgc>
+				<vob file="simple-equations.mpeg" pause="3" />
+			</pgc>
+			<pgc>
+				<vob file="equations-2.mpeg" pause="3" />
+			</pgc>
+			<pgc>
+				<vob file="equations-3.mpeg" pause="3" />
+			</pgc>
+			<pgc>
+				<vob file="algebra--linear-equations-4.mpeg" pause="3" />
+				<post> call menu; </post>
+			</pgc>
+		</titles>
+	</titleset>
+</dvdauthor>

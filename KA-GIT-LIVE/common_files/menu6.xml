@@ -1,0 +1,18 @@
+<subpictures>
+ <stream>
+   <spu
+       force="yes"
+       start="00:00:00.00"
+       image="../common_files/main6.png"
+       select="../common_files/main6.png"
+       highlight="../common_files/main6h.png"
+       autooutline="infer"
+       outlinewidth="2"
+       autoorder="rows">
+ </spu>
+ </stream>
+</subpictures> 
+
+
+
+

@@ -1,11 +1,12 @@
 <dvdauthor>
 	<vmgm>
-	<fpc>jump vmgm menu entry title; </fpc>
+	<fpc>jump vmgm menu 1; </fpc>
 		<menus>
-			<video format="PAL" aspect="4:3" resolution="720x576"/>
+			<video format="PAL"/>
 			<pgc entry="title">
 				<vob file="mainmenu.mpeg" pause="inf" />
 				@a
+				 <post>jump titleset 1 menu;</post>
 			</pgc>
 		</menus>
 	</vmgm>

@@ -148,7 +148,7 @@ def getPlayListFromAPI(options):
 			#TESTING
 			
 				count = count + 1;
-				if(count > 14 and options.sample=='y'):
+				if(count > 1 and options.sample=='y'):
 					return;
 			
 				
@@ -190,6 +190,7 @@ def downloadVideos(options):
 					outputMessage("I removed existing MP4 file: " + pairedInfo[1])
 					#downloadAndConvertFile(options, playlistfile, pairedInfo)
 				else:
+					#TODO check file sizes match
 					outputMessage("MP4 file already exists will not bother to re-download it: " + pairedInfo[1])
 					##check file sizes match anyway before converting
 					continue;
@@ -207,7 +208,8 @@ def convertVideos(options):
 	for pairedInfo in downloadLinks:
 		convertvideo(options,pairedInfo[1]);
 		global totalDVDSize;
-		if(totalDVDSize>4500000000):#1136314880):
+		#TODO check size BEFORE convert Video to prevent overflow of Disk!?
+		if(totalDVDSize>4300000000):#1136314880):
 			dvdend=item+1; # because the for loop is not inclusive of the last element so +1
 			dvdpoints.append([dvdstart,dvdend])
 			dvdstart=item+1;
@@ -237,7 +239,12 @@ def convertvideo(options, filename):
 			updateTotalDVDSize(mpegFile);
 			return;
 	outputMessage("Converting " + filename)
-	call_args = ["ffmpeg", "-i", filename, "-target", "pal-dvd", mpegFile,"-ar","48000","-acodec","TrueHD"];
+	
+	#call_args=["ffmpeg","-i",filename,"-f","dvd","-r","25","-ar","48000","-vf","setsar=1:1,scale=iw-40:ih-40,pad=iw+40:ih+40:20:20:violet,setdar=16:9","-b:v","6000000","-maxrate","9000000","-bufsize","1835008","-packetsize","2048","-muxrate","10080000","-b:a","448000","-c:v","mpeg2video","-c:a","ac3","-g","15","-pix_fmt","yuv420p","-minrate","0","-qmin","3","-y",mpegFile]
+	call_args = ["ffmpeg", "-i", filename,  "-ar","48000","-vf","setsar=1:1,scale=iw-80:ih-40,pad=iw+80:ih+40:40:20:violet,setdar=16:9 ","-target", "pal-dvd","-y",mpegFile];
+	#call_args = ["ffmpeg", "-i", filename,  "-r","25","-ar","48000","-b:v" ,"1536k", "-qmin", "3",	"-vf","setsar=1:1,scale=iw-40:ih-40,pad=iw+40:ih+40:20:20:violet,setdar=16:9 ","-y",mpegFile,];
+#	call_args = ["ffmpeg", "-i", filename, "-target", "pal-dvd", "-ar","48000",	"-vf","setdar=16:9","-vf","scale=iw*min(720/iw\,576/ih):ih*min(720/iw\,576/ih),pad=720:576:(720-iw)/2:(576-ih)/2:violet","-y",mpegFile,];
+	#call_args = ["ffmpeg", "-i", filename, "-target", "pal-dvd", "-ar","48000",	"-vf","setdar=16:9","-padtop","10","-padbottom","10","-padcolor","002020","-y",mpegFile,];
 	runProcess(call_args);
 	time.sleep(2);
 	updateTotalDVDSize(mpegFile);
@@ -286,18 +293,18 @@ def createRootMenu(options,start,end):
 	#create the main menu
 	im = Image.open(options.background);
 	draw = ImageDraw.Draw(im)
-	position=14;
+	position=60;
 	font=getFont();
 	menuplus=1;
 	titleindex=0;
 	for title in range(start,end):
 		if(titleindex%14==0 and titleindex!=0):
-			draw.text((60, position), "Videos Part "+ str(menuplus), font=font, fill=(255,255,255))
+			draw.text((100, position), "Videos Part "+ str(menuplus), font=font, fill=(255,255,255))
 			menuplus=menuplus+1;
-			position=position+40
+			position=position+34
 		titleindex=titleindex+1;
 	#draw the final text
-	draw.text((60, position), "Videos Part "+ str(menuplus), font=font, fill=(255,255,255))
+	draw.text((100, position), "Videos Part "+ str(menuplus), font=font, fill=(255,255,255))
 	backFile=options.output +"/mainmenu.jpg";
 	im.save(backFile , "JPEG",quality=95);
 	
@@ -362,7 +369,7 @@ def createTitles(options,start,end,dvdindex):
 	
 
 def flushTitleToTemplate(options,buttonText, titles,titleindex,titleText,dvdindex):
-	buttonText=buttonText+"<button>jump vmgm menu 1;</button>"
+	buttonText=buttonText+"<button>jump vmgm menu entry title; </button>"
 	text=readFile(options.common+"/template-titles.xml")
 	first=  text.replace('@a',buttonText);
 	second= first.replace('@x',str(titleindex))
@@ -382,7 +389,7 @@ def getFont():
 	
 def createBackgroundMenuImages(options,start,end,dvdindex):
 	im = Image.open(options.background);
-	position=14;
+	position=60;
 	draw = ImageDraw.Draw(im)
 	menuindex=0;
 	font=getFont();
@@ -393,24 +400,24 @@ def createBackgroundMenuImages(options,start,end,dvdindex):
 		
 		if(buttoncount%13==0 and buttoncount!=0):##13 is the number of video items per menu
 			#draw the return to  main menu button text
-			draw.text((60, position), " << Return to main menu", font=font, fill=(255,255,255))
+			draw.text((100, position), " << Return to main menu", font=font, fill=(255,255,255))
 			backName="background-image-"+str(menuindex)+"-dvd-"+str(dvdindex); #eg bacground1	
 			backFile=options.output +"/"+backName+".jpg";
 			im.save(backFile , "JPEG",quality=95)   ;
 			im = Image.open(options.background);
-			position=14;
+			position=60;
 			menuindex=menuindex+1;
 			del draw;
 			draw = ImageDraw.Draw(im)
 			createMainMenu(options, backFile, backName,(buttoncount+1),-1); #plus one is for the return to main menu button
 			buttoncount=0;
 		
-		draw.text((60, position), globtitles[title], font=font, fill=(255,255,255))
-		position=position+40
+		draw.text((100, position), globtitles[title], font=font, fill=(255,255,255))
+		position=position+34
 		buttoncount=buttoncount+1;
 			
 	#draw the return to  main menu button text
-	draw.text((60, position), " << Return to main menu", font=font, fill=(255,255,255))
+	draw.text((100, position), " << Return to main menu", font=font, fill=(255,255,255))
 	#write the final menu
 	backName="background-image-"+str(menuindex)+"-dvd-"+str(dvdindex); #eg bacground1	
 	backFile=options.output +"/"+backName+".jpg";
@@ -468,7 +475,8 @@ def createMainMenu(options, backgroundFile,backName,numButtons,soundTrack):
 	time.sleep(1)
 	p2 = Popen(['ppmtoy4m', '-n', '1', '-F', '25:1', '-I', 't', '-A', '59:54', '-L', '-S', '420jpeg'], stdin=p1.stdout, stdout=PIPE)
 	time.sleep(1)
-	p3 = Popen(['mpeg2enc', '-I', '0', '-f', '8', '-n', 'p', '-o', outm2v], stdin=p2.stdout, stdout=PIPE)
+	#-a 2 is 4:3
+	p3 = Popen(['mpeg2enc', '-I', '0', '-f', '8', '-n', 'p','-a','2', '-o', outm2v], stdin=p2.stdout, stdout=PIPE)
 	time.sleep(1)
 	p4 = Popen(['mplex', '-f', '8', '-o', '/dev/stdout', outm2v, chosenTrack], stdin=p3.stdout, stdout=PIPE)
 	time.sleep(1)

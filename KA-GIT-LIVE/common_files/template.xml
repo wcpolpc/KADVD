@@ -6,7 +6,7 @@
 			<pgc entry="title">
 				<vob file="mainmenu.mpeg" pause="inf" />
 				@a
-				 <post>jump titleset 1 menu;</post>
+				 
 			</pgc>
 		</menus>
 	</vmgm>

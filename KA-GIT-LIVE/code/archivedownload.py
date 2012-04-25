@@ -1,11 +1,23 @@
 
 '''
 Created on 12 Jan 2012
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-@author: worldlassproject
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+@author: dev worldlassproject.org.uk
 '''
 
-""" Wrapper for uploading/downloading all the system-wide data """
+""" Downloads the KA archive """
 
 import os, platform, sys
 import subprocess
@@ -85,7 +97,7 @@ def getPlayListFromAPI(options):
 					filename = options.output + "/" + name + ".mp4";
 					downloadLinks.append([playlistfile,filename]); 
 					names.append(name);
-			#TESTING
+					#TESTING
 			
 					count = count + 1;
 					if(count > 1 and options.sample=='y'):
@@ -110,7 +122,6 @@ def checkFileDownloadedCorrectly(playlistfile, filename):
 		outputMessage("File on disk is OK: "+ str(filename))
 		return True;
 	
-						# do nothing for existing files
 def getDownloadFileSize(playlistfile):
 	site = urllib.urlopen(playlistfile)
 	meta = site.info()

@@ -4,7 +4,7 @@
        force="yes"
        start="00:00:00.00"
        image="../dvd_menus/main6.png"
-       select="../dvd_menus/main6h.png"
+       select="../dvd_menus/main6.png"
        highlight="../dvd_menus/main6h.png"
        autooutline="infer"
        outlinewidth="2"

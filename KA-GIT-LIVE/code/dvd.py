@@ -241,7 +241,7 @@ def convertvideo(options, filename):
 	outputMessage("Converting " + filename)
 	
 	#call_args=["ffmpeg","-i",filename,"-f","dvd","-r","25","-ar","48000","-vf","setsar=1:1,scale=iw-40:ih-40,pad=iw+40:ih+40:20:20:violet,setdar=16:9","-b:v","6000000","-maxrate","9000000","-bufsize","1835008","-packetsize","2048","-muxrate","10080000","-b:a","448000","-c:v","mpeg2video","-c:a","ac3","-g","15","-pix_fmt","yuv420p","-minrate","0","-qmin","3","-y",mpegFile]
-	call_args = ["ffmpeg", "-i", filename,  "-ar","48000","-vf","setsar=1:1,scale=iw-80:ih-40,pad=iw+80:ih+40:40:20:violet,setdar=16:9 ","-target", "pal-dvd","-y",mpegFile];
+	call_args = ["ffmpeg", "-i", filename,  "-ar","48000","-vf","setsar=1:1,scale=iw-80:ih-40,pad=iw+80:ih+40:40:20:black,setdar=16:9 ","-target", "pal-dvd","-y",mpegFile]; #TODO - aspect 16:9 - keep padding in ratio 80:64
 	#call_args = ["ffmpeg", "-i", filename,  "-r","25","-ar","48000","-b:v" ,"1536k", "-qmin", "3",	"-vf","setsar=1:1,scale=iw-40:ih-40,pad=iw+40:ih+40:20:20:violet,setdar=16:9 ","-y",mpegFile,];
 #	call_args = ["ffmpeg", "-i", filename, "-target", "pal-dvd", "-ar","48000",	"-vf","setdar=16:9","-vf","scale=iw*min(720/iw\,576/ih):ih*min(720/iw\,576/ih),pad=720:576:(720-iw)/2:(576-ih)/2:violet","-y",mpegFile,];
 	#call_args = ["ffmpeg", "-i", filename, "-target", "pal-dvd", "-ar","48000",	"-vf","setdar=16:9","-padtop","10","-padbottom","10","-padcolor","002020","-y",mpegFile,];
